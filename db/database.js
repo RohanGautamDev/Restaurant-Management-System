@@ -1,18 +1,39 @@
 /**
  * DineMind AI — db/database.js
  * SQLite Database Connection & Schema Definition (all 8 models)
+ * Includes Vercel Serverless /tmp filesystem support
  */
 
 'use strict';
 
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
-const dbPath = path.join(__dirname, '..', 'dinemind.db');
+let dbPath = path.join(__dirname, '..', 'dinemind.db');
+
+// Handle Vercel serverless environment (where root is read-only)
+if (process.env.VERCEL) {
+  const tmpPath = path.join('/tmp', 'dinemind.db');
+  if (!fs.existsSync(tmpPath) && fs.existsSync(dbPath)) {
+    try {
+      fs.copyFileSync(dbPath, tmpPath);
+    } catch (e) {
+      console.warn('Failed to copy db to /tmp, will initialize new DB:', e.message);
+    }
+  }
+  dbPath = tmpPath;
+}
+
 const db = new Database(dbPath);
 
 // Enable WAL mode & foreign keys for performance and data integrity
-db.pragma('journal_mode = WAL');
+try {
+  db.pragma('journal_mode = WAL');
+} catch (e) {
+  // WAL mode might be restricted in some serverless environments
+  db.pragma('journal_mode = DELETE');
+}
 db.pragma('foreign_keys = ON');
 
 function initSchema() {
