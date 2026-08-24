@@ -1,0 +1,10 @@
+{
+  "python.terminal.activateEnvironment": true,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "files.exclude": {
+    "**/.git": false,
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  }
+}

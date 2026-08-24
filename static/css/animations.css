@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════════
+   DineMind AI — animations.css
+   the-edge.studio inspired fluid motion, magnetic cursor,
+   3D holographic tilt, dynamic card spotlight, kinetic marquee & liquid waves
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Background Layers ─── */
+
+/* ─── 2. Background Layers ─── */
+#bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Fluid Gradient Mesh */
+.bg-mesh {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 15% 5%,  rgba(79,142,255,0.09) 0%,  transparent 60%),
+    radial-gradient(ellipse 70% 60% at 85% 95%, rgba(157,111,255,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,212,184,0.06) 0%,   transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(245,200,66,0.06) 0%,  transparent 50%);
+  animation: meshFluid 20s ease-in-out infinite alternate;
+}
+
+@keyframes meshFluid {
+  0%   { transform: scale(1) translate(0, 0); }
+  33%  { transform: scale(1.06) translate(20px, -15px); }
+  66%  { transform: scale(0.96) translate(-15px, 20px); }
+  100% { transform: scale(1.03) translate(10px, 10px); }
+}
+
+/* Grid Overlay with Radial Mask */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(79,142,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,142,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+
+/* Fluid Floating Glowing Orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  animation: orbAppear 2s ease forwards, orbLiquidFloat var(--d, 22s) cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  animation-delay: var(--delay, 0s), var(--delay, 0s);
+  will-change: transform;
+}
+
+@keyframes orbAppear {
+  to { opacity: var(--op, 0.45); }
+}
+
+@keyframes orbLiquidFloat {
+  0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  25%  { transform: translate3d(var(--tx1, 45px), var(--ty1, -35px), 0) scale(1.12) rotate(15deg); }
+  50%  { transform: translate3d(var(--tx2, -30px), var(--ty2, 55px), 0) scale(0.9) rotate(-10deg); }
+  75%  { transform: translate3d(var(--tx3, 35px), var(--ty3, 25px), 0) scale(1.08) rotate(8deg); }
+  100% { transform: translate3d(var(--tx4, -15px), var(--ty4, -45px), 0) scale(1) rotate(-5deg); }
+}
+
+.orb-1 {
+  width: 650px; height: 650px;
+  background: radial-gradient(circle, rgba(79,142,255,0.6), transparent 70%);
+  top: -15%; left: -10%;
+  --d: 22s; --op: 0.4; --delay: 0.2s;
+  --tx1: 60px; --ty1: -45px; --tx2: -40px; --ty2: 70px;
+  --tx3: 50px; --ty3: 25px; --tx4: -25px; --ty4: -55px;
+}
+.orb-2 {
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(157,111,255,0.55), transparent 70%);
+  top: 20%; right: -12%;
+  --d: 28s; --op: 0.35; --delay: 0.6s;
+  --tx1: -70px; --ty1: 35px; --tx2: 30px; --ty2: -80px;
+  --tx3: -45px; --ty3: 60px; --tx4: 35px; --ty4: -25px;
+}
+.orb-3 {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(0,212,184,0.5), transparent 70%);
+  bottom: -8%; left: 20%;
+  --d: 25s; --op: 0.32; --delay: 1s;
+  --tx1: 35px; --ty1: 55px; --tx2: -60px; --ty2: -35px;
+  --tx3: 25px; --ty3: -70px; --tx4: -35px; --ty4: 45px;
+}
+.orb-4 {
+  width: 340px; height: 340px;
+  background: radial-gradient(circle, rgba(245,200,66,0.42), transparent 70%);
+  top: 50%; left: 52%;
+  --d: 19s; --op: 0.3; --delay: 1.4s;
+  --tx1: -45px; --ty1: -35px; --tx2: 70px; --ty2: 25px;
+  --tx3: -25px; --ty3: 55px; --tx4: 35px; --ty4: -45px;
+}
+.orb-5 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(255,92,138,0.38), transparent 70%);
+  bottom: 12%; right: 16%;
+  --d: 32s; --op: 0.28; --delay: 0.5s;
+  --tx1: 55px; --ty1: -55px; --tx2: -35px; --ty2: 35px;
+  --tx3: 45px; --ty3: 65px; --tx4: -55px; --ty4: -25px;
+}
+.orb-6 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(79,142,255,0.45), transparent 70%);
+  top: 68%; left: 3%;
+  --d: 24s; --op: 0.25; --delay: 1.8s;
+  --tx1: 35px; --ty1: -45px; --tx2: 70px; --ty2: 35px;
+  --tx3: -25px; --ty3: -55px; --tx4: 15px; --ty4: 25px;
+}
+
+/* ─── 3. Card 3D Perspective Tilt & Dynamic Spotlight ─── */
+.card-glass {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, border-color 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+/* Dynamic Spotlight Gradient that follows mouse coordinates inside each card */
+.card-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.08),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-glass:hover::before {
+  opacity: 1;
+}
+
+/* ─── 4. Kinetic Typography Marquee Ticker ─── */
+.kinetic-marquee-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: rgba(13, 18, 37, 0.6);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  padding: 8px 0;
+  display: flex;
+  user-select: none;
+}
+
+.kinetic-marquee-track {
+  display: flex;
+  gap: 32px;
+  white-space: nowrap;
+  animation: marqueeScroll 28s linear infinite;
+  will-change: transform;
+}
+
+.kinetic-marquee-wrap:hover .kinetic-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-item {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marquee-item .dot {
+  color: var(--gold);
+}
+
+/* ─── 5. Magnetic Button Micro-Physics ─── */
+.btn {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+  will-change: transform;
+}
+
+/* ─── 6. Ripple Wave Effect on Click ─── */
+.ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: rippleSpread 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes rippleSpread {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ─── 7. Page Section Enter Transition ─── */
+.view-section.active {
+  animation: viewStaggerIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes viewStaggerIn {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Pulse Glowing Tags */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 14px rgba(79,142,255,0.2); }
+  50%       { box-shadow: 0 0 32px rgba(79,142,255,0.45); }
+}
+
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── 8. the-edge.studio Chromatic Pinwheel / Vortex Iris ─── */
+.edge-pinwheel-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edge-pinwheel-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 100, 100, 0.4), rgba(79, 142, 255, 0.3), rgba(0, 212, 184, 0.2), transparent 70%);
+  filter: blur(24px);
+  opacity: 0.7;
+  animation: pinwheelGlowPulse 4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pinwheelGlowPulse {
+  0%   { transform: scale(0.9); opacity: 0.5; filter: blur(20px); }
+  100% { transform: scale(1.15); opacity: 0.9; filter: blur(30px); }
+}
+
+.edge-pinwheel-svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  animation: edgeSpin var(--spin-duration, 5s) linear infinite;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+  transition: filter 0.3s ease;
+  will-change: transform;
+}
+
+.edge-pinwheel-svg:hover {
+  filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.6)) brightness(1.15);
+}
+
+@keyframes edgeSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── 9. Accessibility: Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  #custom-cursor-dot, #custom-cursor-ring { display: none !important; }
+  .orb, .bg-mesh, .kinetic-marquee-track, .edge-pinwheel-svg, .edge-pinwheel-glow { animation: none !important; }
+  .card-glass { transform: none !important; }
+}

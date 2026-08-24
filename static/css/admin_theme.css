@@ -1,0 +1,129 @@
+/* ═══════════════════════════════════════════════════════════════
+   DineMind AI — admin_theme.css
+   Custom dark luxury styling for Django Admin (/admin/)
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+:root {
+  --primary: #4f8eff;
+  --secondary: #141b33;
+  --accent: #f5c842;
+  --primary-fg: #ffffff;
+  --body-bg: #05070f;
+  --body-fg: #f0f4ff;
+  --header-bg: #090e1f;
+  --header-color: #f5c842;
+  --breadcrumbs-bg: #0d1225;
+  --breadcrumbs-fg: #8898c4;
+  --link-fg: #4f8eff;
+  --link-hover-color: #7fb3ff;
+  --border-color: rgba(120, 150, 255, 0.15);
+  --darkened-bg: #090e1f;
+  --selected-row: rgba(79, 142, 255, 0.15);
+  --button-bg: #4f8eff;
+  --button-hover-bg: #3a79eb;
+  --default-button-bg: #f5c842;
+  --default-button-hover-bg: #e0b32e;
+}
+
+body {
+  background: #05070f !important;
+  color: #f0f4ff !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+}
+
+#header {
+  background: #090e1f !important;
+  border-bottom: 1px solid rgba(120, 150, 255, 0.18) !important;
+  padding: 14px 24px !important;
+}
+
+#branding h1 {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  color: #f5c842 !important;
+}
+
+.breadcrumbs {
+  background: #0d1225 !important;
+  border-bottom: 1px solid rgba(120, 150, 255, 0.12) !important;
+  color: #8898c4 !important;
+  padding: 10px 24px !important;
+}
+
+.module {
+  background: rgba(13, 18, 37, 0.8) !important;
+  border: 1px solid rgba(120, 150, 255, 0.15) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+}
+
+.module caption, .module h2 {
+  background: rgba(20, 30, 60, 0.9) !important;
+  color: #f0f4ff !important;
+  border-bottom: 1px solid rgba(120, 150, 255, 0.15) !important;
+  font-weight: 600 !important;
+}
+
+table {
+  background: transparent !important;
+}
+
+thead th {
+  background: rgba(255,255,255,0.03) !important;
+  color: #8898c4 !important;
+  border-bottom: 1px solid rgba(120, 150, 255, 0.15) !important;
+}
+
+tbody td, tbody th {
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+  color: #f0f4ff !important;
+}
+
+tbody tr:hover td, tbody tr:hover th {
+  background: rgba(79, 142, 255, 0.08) !important;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: #4f8eff !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  border: none !important;
+  padding: 8px 18px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: linear-gradient(135deg, #f5c842, #ff9f40) !important;
+  color: #040711 !important;
+  font-weight: 700 !important;
+}
+
+/* Floating Launch Portal Button */
+.launch-dinemind-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #f5c842 0%, #ff9f40 100%);
+  color: #040711 !important;
+  font-weight: 800;
+  padding: 14px 24px;
+  border-radius: 40px;
+  box-shadow: 0 8px 32px rgba(245, 200, 66, 0.4);
+  text-decoration: none !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.launch-dinemind-float:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 40px rgba(245, 200, 66, 0.6);
+}

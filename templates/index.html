@@ -1,0 +1,792 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DineMind AI — Smart Restaurant Operations Platform</title>
+  <meta name="description" content="DineMind AI is a futuristic, full-stack restaurant operations platform with smart inventory automation, table recommendations, and live analytics.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+
+  <!-- CSRF Token -->
+  {% csrf_token %}
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       BACKGROUND MOTION LAYERS (the-edge.studio inspired)
+       ════════════════════════════════════════════════ -->
+  <div id="bg-wrap">
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
+    
+    <!-- Floating Blur Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+    <div class="orb orb-6"></div>
+
+    <!-- Kinetic Particle Mesh Canvas -->
+    <canvas id="kinetic-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+  </div>
+
+
+
+  <!-- ═══════════════════════════════════════════════
+       APP SHELL: SIDEBAR + TOPBAR + CONTENT
+       ════════════════════════════════════════════════ -->
+  <div class="app-container">
+
+    <!-- ─── 1. FIXED GLASS SIDEBAR ─── -->
+    <aside class="sidebar" id="main-sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="sidebar-logo" data-route="dashboard">
+          <div class="edge-pinwheel-wrap" style="width:36px;height:36px;">
+            <div class="edge-pinwheel-glow" style="inset:-5px;opacity:0.6;"></div>
+            <svg class="edge-pinwheel-svg" viewBox="0 0 100 100">
+              <path d="M50,50 L50,6 A44,44 0 0,1 88.1,28 C70,35 55,45 50,50 Z" fill="#ff4d6d"/>
+              <path d="M50,50 L88.1,28 A44,44 0 0,1 88.1,72 C75,55 60,50 50,50 Z" fill="#ff9233"/>
+              <path d="M50,50 L88.1,72 A44,44 0 0,1 50,94 C50,75 50,58 50,50 Z" fill="#ffe135"/>
+              <path d="M50,50 L50,94 A44,44 0 0,1 11.9,72 C30,65 45,55 50,50 Z" fill="#38ef7d"/>
+              <path d="M50,50 L11.9,72 A44,44 0 0,1 11.9,28 C25,45 40,50 50,50 Z" fill="#00d2ff"/>
+              <path d="M50,50 L11.9,28 A44,44 0 0,1 50,6 C50,25 50,42 50,50 Z" fill="#8054ff"/>
+            </svg>
+          </div>
+          <div class="sidebar-logo-text" style="margin-left:8px;">
+            <span class="sidebar-logo-title">DineMind</span>
+            <span class="sidebar-logo-tag">AI Operations</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-category">Main Menu</div>
+        <a class="nav-item active" data-route="dashboard" onclick="App.navigate('dashboard'); return false;">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-route="orders" onclick="App.navigate('orders'); return false;">
+          <span class="nav-icon">📋</span>
+          <span>Orders</span>
+        </a>
+        <a class="nav-item" data-route="tables" onclick="App.navigate('tables'); return false;">
+          <span class="nav-icon">🪑</span>
+          <span>Tables & Floor</span>
+        </a>
+        <a class="nav-item" data-route="reservations" onclick="App.navigate('reservations'); return false;">
+          <span class="nav-icon">📅</span>
+          <span>Reservations</span>
+        </a>
+
+        <div class="nav-category">Management</div>
+        <a class="nav-item" data-route="menu" onclick="App.navigate('menu'); return false;">
+          <span class="nav-icon">🍴</span>
+          <span>Menu Matrix</span>
+        </a>
+        <a class="nav-item" data-route="inventory" onclick="App.navigate('inventory'); return false;">
+          <span class="nav-icon">📦</span>
+          <span>Inventory</span>
+          <span class="nav-badge-count" id="sidebar-lowstock-badge" style="display:none;">0</span>
+        </a>
+        <a class="nav-item" data-route="waste" onclick="App.navigate('waste'); return false;">
+          <span class="nav-icon">🌿</span>
+          <span>Food Waste</span>
+        </a>
+
+        <div class="nav-category">Intelligence</div>
+        <a class="nav-item" data-route="reports" onclick="App.navigate('reports'); return false;">
+          <span class="nav-icon">📈</span>
+          <span>Reports & Analytics</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/admin/" target="_blank" class="admin-portal-link">
+          <span>⚙️</span>
+          <span>Django Admin</span>
+        </a>
+        <div class="text-3 text-xs text-center" style="margin-top:6px;">
+          CodeAlpha Internship Project
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─── 2. MAIN WRAPPER ─── -->
+    <div class="main-wrapper">
+      
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle" title="Toggle Navigation">
+            ☰
+          </button>
+          <div class="breadcrumbs">
+            <span>DineMind AI</span>
+            <span>/</span>
+            <span class="breadcrumbs-current" id="topbar-current-page">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="live-status-pill">
+            <span class="status-dot"></span>
+            <span>Kitchen & Pos Live</span>
+          </div>
+
+          <div class="live-clock" id="live-clock-time">--:--:--</div>
+
+          <button class="btn btn-gold btn-sm" onclick="App.openNewOrderModal()">
+            <span>⚡</span>
+            <span>New Order</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ─── Kinetic Typography Marquee Banner (the-edge.studio inspired) ─── -->
+      <div class="kinetic-marquee-wrap">
+        <div class="kinetic-marquee-track">
+          <div class="marquee-item"><span>⚡ DineMind AI Operations</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Autonomous Inventory Sync</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Real-Time POS Matrix</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Peak Rush Analytics</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Smart Seating Algorithm</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Zero Stockout Guarantee</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Food Waste Minimizer</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>⚡ DineMind AI Operations</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Autonomous Inventory Sync</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Real-Time POS Matrix</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Peak Rush Analytics</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Smart Seating Algorithm</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Zero Stockout Guarantee</span> <span class="dot">•</span></div>
+          <div class="marquee-item"><span>Food Waste Minimizer</span> <span class="dot">•</span></div>
+        </div>
+      </div>
+
+      <!-- ─── 3. CONTENT AREA / SPA SECTIONS ─── -->
+      <main class="content-area">
+
+        <!-- ==============================================
+             VIEW 1: DASHBOARD
+             ============================================== -->
+        <section id="view-dashboard" class="view-section active">
+          
+          <!-- Hero Greeting Banner -->
+          <div class="hero-banner">
+            <div>
+              <div class="hero-ai-chip">
+                <span>🤖</span>
+                <span>Real-Time Autonomous Restaurant Ops</span>
+              </div>
+              <h1 class="hero-greeting">Welcome back, Rohan 👋</h1>
+              <p class="hero-sub">Here is your live operations summary and smart restaurant intelligence for today.</p>
+            </div>
+
+            <div class="hero-visual">
+              <div class="edge-pinwheel-wrap" style="width:110px;height:110px;" title="DineMind Autonomous AI Engine (the-edge.studio Pinwheel)">
+                <div class="edge-pinwheel-glow"></div>
+                <svg class="edge-pinwheel-svg" viewBox="0 0 100 100">
+                  <path d="M50,50 L50,6 A44,44 0 0,1 88.1,28 C70,35 55,45 50,50 Z" fill="#ff4d6d"/>
+                  <path d="M50,50 L88.1,28 A44,44 0 0,1 88.1,72 C75,55 60,50 50,50 Z" fill="#ff9233"/>
+                  <path d="M50,50 L88.1,72 A44,44 0 0,1 50,94 C50,75 50,58 50,50 Z" fill="#ffe135"/>
+                  <path d="M50,50 L50,94 A44,44 0 0,1 11.9,72 C30,65 45,55 50,50 Z" fill="#38ef7d"/>
+                  <path d="M50,50 L11.9,72 A44,44 0 0,1 11.9,28 C25,45 40,50 50,50 Z" fill="#00d2ff"/>
+                  <path d="M50,50 L11.9,28 A44,44 0 0,1 50,6 C50,25 50,42 50,50 Z" fill="#8054ff"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low Stock Alert Banner -->
+          <div class="card-glass p-16 mb-24 flex items-center justify-between" id="dashboard-low-stock-banner" style="display:none;border-color:rgba(255,92,138,0.4);background:rgba(255,92,138,0.08);">
+            <div class="flex items-center gap-12">
+              <span style="font-size:1.4rem;">⚠️</span>
+              <div>
+                <div class="text-rose font-bold text-sm">Low Stock Alert (<span class="low-stock-count-number">0</span> Items Below Minimum Threshold)</div>
+                <div class="text-3 text-xs low-stock-items-text mt-4">...</div>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="App.navigate('inventory')">Manage Stock →</button>
+          </div>
+
+          <!-- 6 KPI Metric Cards -->
+          <div class="kpi-grid">
+            <div class="card-glass kpi-card card-glass-glow-gold">
+              <div class="kpi-header">
+                <span class="kpi-title">Today's Revenue</span>
+                <div class="kpi-icon-wrap kpi-icon-gold">💰</div>
+              </div>
+              <div class="kpi-value text-gold" id="kpi-today-revenue">$0.00</div>
+              <div class="kpi-footer">
+                <span class="text-green">↑ Active</span>
+                <span>Completed guest orders</span>
+              </div>
+            </div>
+
+            <div class="card-glass kpi-card card-glass-glow-blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Total Orders</span>
+                <div class="kpi-icon-wrap kpi-icon-blue">📋</div>
+              </div>
+              <div class="kpi-value text-blue" id="kpi-today-orders">0</div>
+              <div class="kpi-footer">
+                <span>Orders recorded today</span>
+              </div>
+            </div>
+
+            <div class="card-glass kpi-card card-glass-glow-teal">
+              <div class="kpi-header">
+                <span class="kpi-title">Available Tables</span>
+                <div class="kpi-icon-wrap kpi-icon-teal">🪑</div>
+              </div>
+              <div class="kpi-value text-teal" id="kpi-available-tables">0</div>
+              <div class="kpi-footer">
+                <span>Ready for seating</span>
+              </div>
+            </div>
+
+            <div class="card-glass kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Occupied Tables</span>
+                <div class="kpi-icon-wrap kpi-icon-purple">👥</div>
+              </div>
+              <div class="kpi-value text-purple" id="kpi-occupied-tables">0</div>
+              <div class="kpi-footer">
+                <span>Active dining parties</span>
+              </div>
+            </div>
+
+            <div class="card-glass kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Low Stock Items</span>
+                <div class="kpi-icon-wrap kpi-icon-rose">⚠️</div>
+              </div>
+              <div class="kpi-value text-rose" id="kpi-low-stock-count">0</div>
+              <div class="kpi-footer">
+                <span>Ingredients needing restock</span>
+              </div>
+            </div>
+
+            <div class="card-glass kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Top Dish Today</span>
+                <div class="kpi-icon-wrap kpi-icon-gold">⭐</div>
+              </div>
+              <div class="kpi-value text-1 text-md truncate" id="kpi-popular-dish" style="font-size:1.1rem;margin-top:14px;">—</div>
+              <div class="kpi-footer">
+                <span>Leading guest preference</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts + Smart AI Insights Grid -->
+          <div class="grid gap-24" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+            
+            <!-- Left: Sales Chart & Peak Hours -->
+            <div class="card-glass chart-card">
+              <div class="chart-header">
+                <div class="chart-title">
+                  <span>📈</span>
+                  <span>Daily Revenue Trend (Last 7 Days)</span>
+                </div>
+              </div>
+              <div id="dashboard-sales-chart">
+                <div class="skeleton skel-card skel-full"></div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="chart-title mt-16" style="font-size:0.95rem;">
+                <span>⏰</span>
+                <span>Peak Hour Activity</span>
+              </div>
+              <div id="dashboard-peak-hours" class="mt-8">
+                <div class="skeleton skel-card skel-full" style="height:90px;"></div>
+              </div>
+            </div>
+
+            <!-- Right: DineMind AI Operational Insights Card -->
+            <div class="card-glass chart-card ai-insights-card">
+              <div class="chart-header">
+                <div class="chart-title">
+                  <span>✨</span>
+                  <span>DineMind AI Operational Insights</span>
+                </div>
+                <span class="badge badge-preparing">Live Analysis</span>
+              </div>
+              
+              <div id="smart-ai-insights-list">
+                <div class="skeleton skel-card skel-full mb-12"></div>
+                <div class="skeleton skel-card skel-full mb-12"></div>
+                <div class="skeleton skel-card skel-full"></div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ==============================================
+             VIEW 2: ORDERS MANAGEMENT
+             ============================================== -->
+        <section id="view-orders" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Order Management</h2>
+              <p class="text-3 text-sm">Real-time order pipeline with automatic inventory synchronisation.</p>
+            </div>
+            <div class="flex gap-8">
+              <button class="btn btn-gold" onclick="App.openNewOrderModal()">+ New Order</button>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div class="flex gap-8 mb-20 flex-wrap">
+            <button class="btn btn-glass btn-sm" onclick="App.loadOrders('all')">All Orders</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadOrders('pending')">Pending</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadOrders('preparing')">Preparing</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadOrders('ready')">Ready</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadOrders('completed')">Completed</button>
+          </div>
+
+          <div class="table-container">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>Order Ref</th>
+                  <th>Table</th>
+                  <th>Dish Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body">
+                <tr><td colspan="6" class="text-center text-3" style="padding:30px;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 3: TABLE FLOORPLAN
+             ============================================== -->
+        <section id="view-tables" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Table Management</h2>
+              <p class="text-3 text-sm">Interactive dining room floor plan and table seating status.</p>
+            </div>
+          </div>
+
+          <!-- Smart Table Recommendation Widget -->
+          <div class="card-glass p-20 mb-28 card-glass-glow-teal">
+            <div class="flex items-center justify-between flex-wrap gap-16">
+              <div>
+                <div class="text-teal font-bold text-sm flex items-center gap-6">
+                  <span>🤖</span>
+                  <span>Smart Table Recommendation Engine</span>
+                </div>
+                <div class="text-2 text-xs mt-4">Calculates optimal table capacity to maximize dining efficiency.</div>
+              </div>
+              <div class="flex items-center gap-10">
+                <input type="number" id="smart-table-guests-input" class="form-control" placeholder="Guests" value="4" min="1" max="20" style="width:110px;">
+                <button class="btn btn-teal btn-sm" onclick="App.runSmartTableRecommendation()">Find Best Table</button>
+              </div>
+            </div>
+            <div id="smart-table-result-box" class="mt-16 hidden"></div>
+          </div>
+
+          <!-- Floorplan Grid -->
+          <div class="table-floor-grid" id="tables-floor-grid">
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 4: RESERVATIONS
+             ============================================== -->
+        <section id="view-reservations" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Reservations System</h2>
+              <p class="text-3 text-sm">Conflict-checked dining bookings and table reservations.</p>
+            </div>
+            <button class="btn btn-gold" onclick="App.openNewReservationModal()">+ Book Reservation</button>
+          </div>
+
+          <div class="table-container">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>Guest Name</th>
+                  <th>Party Size</th>
+                  <th>Table</th>
+                  <th>Date & Time</th>
+                  <th>Status</th>
+                  <th>Phone</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="reservations-table-body">
+                <tr><td colspan="7" class="text-center text-3" style="padding:30px;">Loading reservations...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 5: MENU MATRIX
+             ============================================== -->
+        <section id="view-menu" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Menu Matrix</h2>
+              <p class="text-3 text-sm">Dynamic menu catalog with auto out-of-stock detection based on inventory levels.</p>
+            </div>
+            <button class="btn btn-gold" onclick="App.openAddDishModal()">+ Add Menu Item</button>
+          </div>
+
+          <!-- Category Filters -->
+          <div class="flex gap-8 mb-20 flex-wrap">
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('all')">All Dishes</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('starter')">🥗 Starters</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('main')">🥩 Mains</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('dessert')">🍰 Desserts</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('beverage')">🍹 Beverages</button>
+            <button class="btn btn-glass btn-sm" onclick="App.loadMenu('special')">⭐ Specials</button>
+          </div>
+
+          <div class="menu-card-matrix" id="menu-matrix-grid">
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+            <div class="skeleton skel-card"></div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 6: INVENTORY COMMAND CENTER
+             ============================================== -->
+        <section id="view-inventory" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Inventory Command Center</h2>
+              <p class="text-3 text-sm">Real-time ingredient stock levels, safety thresholds, and automatic deduction.</p>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>Ingredient</th>
+                  <th>Current Stock</th>
+                  <th>Min Safety Level</th>
+                  <th>Stock Health</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <tr><td colspan="5" class="text-center text-3" style="padding:30px;">Loading inventory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 7: FOOD WASTE & SUSTAINABILITY
+             ============================================== -->
+        <section id="view-waste" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Food Waste & Sustainability</h2>
+              <p class="text-3 text-sm">Track kitchen waste incidents and analyze financial loss reduction.</p>
+            </div>
+          </div>
+
+          <div id="waste-summary-metrics"></div>
+
+          <div class="table-container mt-20">
+            <table class="table-modern">
+              <thead>
+                <tr>
+                  <th>Wasted Item</th>
+                  <th>Quantity</th>
+                  <th>Reason</th>
+                  <th>Est. Cost Loss</th>
+                  <th>Logged Date</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="waste-logs-table-body">
+                <tr><td colspan="6" class="text-center text-3" style="padding:30px;">Loading waste logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 8: REPORTS & ANALYTICS
+             ============================================== -->
+        <section id="view-reports" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <h2 class="font-display text-2xl font-bold">Intelligence & Reports</h2>
+              <p class="text-3 text-sm">Historical restaurant metrics, top dishes ranking, and revenue analytics.</p>
+            </div>
+          </div>
+
+          <div class="card-glass p-24">
+            <div class="chart-title mb-16">🏆 Most Popular Dishes Ranking</div>
+            <div id="reports-popular-items-list">
+              <div class="skeleton skel-card skel-full"></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CUSTOM MODALS
+       ════════════════════════════════════════════════ -->
+
+  <!-- Modal 1: Place New Order -->
+  <div class="modal-backdrop" id="modal-new-order">
+    <div class="modal-window" style="max-width:680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚡ Place New Order</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-new-order')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Dining Table *</label>
+          <select id="order-modal-table-select" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Menu Dishes</label>
+          <div id="order-modal-item-picker" class="grid gap-8" style="grid-template-columns:repeat(auto-fill, minmax(180px,1fr));max-height:160px;overflow-y:auto;padding:4px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Selected Order Items</label>
+          <div id="order-modal-cart-items" class="card-glass p-8" style="background:rgba(255,255,255,0.02);min-height:70px;"></div>
+        </div>
+
+        <div class="flex items-center justify-between p-8 card-glass mb-16" style="border-color:rgba(245,200,66,0.3);">
+          <span class="text-1 font-bold text-sm">Order Total:</span>
+          <span class="text-gold font-bold text-lg" id="order-modal-total-amount">$0.00</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Order Notes / Kitchen Special Requests</label>
+          <input type="text" id="order-modal-notes" class="form-control" placeholder="e.g., Less spicy, no onions, extra napkins">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-new-order')">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="App.submitNewOrder()">🍽️ Submit Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Dish -->
+  <div class="modal-backdrop" id="modal-add-dish">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">🍴 Add Menu Item</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-add-dish')">✕</button>
+      </div>
+      <form id="form-add-dish" onsubmit="event.preventDefault(); App.submitNewDish();">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Dish Name *</label>
+              <input type="text" id="dish-name" class="form-control" placeholder="e.g. Truffle Ribeye" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="dish-category" class="form-control">
+                <option value="starter">Starter</option>
+                <option value="main" selected>Main Course</option>
+                <option value="dessert">Dessert</option>
+                <option value="beverage">Beverage</option>
+                <option value="special">Chef Special</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Price ($ USD) *</label>
+              <input type="number" id="dish-price" class="form-control" step="0.01" min="0.01" placeholder="24.99" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Image URL (Optional)</label>
+              <input type="url" id="dish-image" class="form-control" placeholder="https://...">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="dish-desc" class="form-control" rows="2" placeholder="Rich description of flavours and ingredients..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="flex items-center gap-8 pointer">
+              <input type="checkbox" id="dish-veg" style="accent-color:var(--green);">
+              <span class="text-2 text-sm">Vegetarian Dish</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-add-dish')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Dish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Restock Inventory -->
+  <div class="modal-backdrop" id="modal-restock-inventory">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">📦 Restock Ingredient</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-restock-inventory')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="restock-item-id">
+        <div class="text-2 text-sm mb-16">
+          Adding fresh inventory supply for: <strong class="text-gold" id="restock-item-name-label">—</strong>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity to Add *</label>
+          <input type="number" id="restock-add-qty" class="form-control" step="0.1" min="0.1" placeholder="e.g. 10.0" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-restock-inventory')">Cancel</button>
+        <button type="button" class="btn btn-teal" onclick="App.submitRestock()">Confirm Restock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Log Food Waste -->
+  <div class="modal-backdrop" id="modal-log-waste">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">🗑️ Record Food Waste</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-log-waste')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="waste-item-id">
+        <div class="text-2 text-sm mb-16">
+          Logging wasted inventory for: <strong class="text-rose" id="waste-item-name-label">—</strong>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity Wasted *</label>
+            <input type="number" id="waste-qty-input" class="form-control" step="0.01" min="0.01" placeholder="0.5" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason *</label>
+            <select id="waste-reason-select" class="form-control">
+              <option value="expired">Expired / Past Date</option>
+              <option value="overcooked">Overcooked / Prep Defect</option>
+              <option value="spilled">Spilled / Damaged</option>
+              <option value="quality">Quality Rejected</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Log Reason</label>
+          <textarea id="waste-notes-input" class="form-control" rows="2" placeholder="Details of the incident..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-log-waste')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="App.submitWasteLog()">Log Waste Loss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: New Reservation -->
+  <div class="modal-backdrop" id="modal-new-reservation">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">📅 New Dining Reservation</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-new-reservation')">✕</button>
+      </div>
+      <form id="form-new-reservation" onsubmit="event.preventDefault(); App.submitReservation();">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Guest Name *</label>
+              <input type="text" id="res-cust-name" class="form-control" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" id="res-cust-phone" class="form-control" placeholder="+1-555-0199">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Party Guests *</label>
+              <input type="number" id="res-cust-guests" class="form-control" min="1" max="25" value="2" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date & Time *</label>
+              <input type="datetime-local" id="res-cust-datetime" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Specific Table (Optional)</label>
+            <select id="res-table-select" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Special Requests</label>
+            <textarea id="res-cust-notes" class="form-control" rows="2" placeholder="Anniversary setup, high chair..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-new-reservation')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Stack Mount -->
+  <div id="toast-stack" class="toast-stack"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       JAVASCRIPT MODULES
+       ════════════════════════════════════════════════ -->
+  <script src="{% static 'js/api.js' %}"></script>
+  <script src="{% static 'js/animations.js' %}"></script>
+  <script src="{% static 'js/components.js' %}"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+
+</body>
+</html>

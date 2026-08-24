@@ -1,0 +1,426 @@
+/* ═══════════════════════════════════════════════════════════════
+   DineMind AI — components.css
+   Glass cards, interactive buttons, modern form inputs,
+   status badges, data tables, modals, toast alerts & skeletons
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Glassmorphism Card System ─── */
+.card-glass {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--t-base), border-color var(--t-base), box-shadow var(--t-base), background var(--t-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glass::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  pointer-events: none;
+}
+
+.card-glass:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+  background: var(--bg-card-hover);
+}
+
+.card-glass-glow-gold:hover {
+  border-color: rgba(245, 200, 66, 0.4);
+  box-shadow: var(--shadow-gold), var(--shadow-hover);
+}
+
+.card-glass-glow-blue:hover {
+  border-color: rgba(79, 142, 255, 0.4);
+  box-shadow: var(--shadow-blue), var(--shadow-hover);
+}
+
+.card-glass-glow-teal:hover {
+  border-color: rgba(0, 212, 184, 0.4);
+  box-shadow: var(--shadow-teal), var(--shadow-hover);
+}
+
+/* ─── 2. Buttons ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r-sm);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--t-base);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+  color: #040711;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(245, 200, 66, 0.25);
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(245, 200, 66, 0.45);
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(79, 142, 255, 0.25);
+}
+.btn-blue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(79, 142, 255, 0.45);
+}
+
+.btn-teal {
+  background: linear-gradient(135deg, var(--teal) 0%, #00a896 100%);
+  color: #031412;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(0, 212, 184, 0.25);
+}
+.btn-teal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0, 212, 184, 0.45);
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--glass-border);
+  color: var(--text-1);
+  backdrop-filter: blur(12px);
+}
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+}
+.btn-ghost:hover {
+  color: var(--text-1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-danger {
+  background: rgba(255, 92, 138, 0.12);
+  border-color: rgba(255, 92, 138, 0.3);
+  color: var(--rose-light);
+}
+.btn-danger:hover {
+  background: rgba(255, 92, 138, 0.25);
+  border-color: var(--rose);
+  transform: translateY(-1px);
+}
+
+.btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: var(--r-xs); }
+.btn-lg { padding: 14px 28px; font-size: 0.96rem; border-radius: var(--r-md); }
+.btn-icon { width: 38px; height: 38px; padding: 0; border-radius: var(--r-sm); display: inline-flex; align-items: center; justify-content: center; }
+
+/* ─── 3. Form Controls ─── */
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.form-control {
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 0.88rem;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  background: rgba(255,255,255,0.07);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(79, 142, 255, 0.2);
+}
+
+.form-control::placeholder {
+  color: var(--text-3);
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238898c4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+select.form-control option {
+  background: #0d1225;
+  color: var(--text-1);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ─── 4. Status Badges & Chips ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.badge-available {
+  background: rgba(62, 207, 142, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(62, 207, 142, 0.25);
+}
+
+.badge-occupied {
+  background: rgba(255, 92, 138, 0.12);
+  color: var(--rose-light);
+  border: 1px solid rgba(255, 92, 138, 0.25);
+}
+
+.badge-reserved {
+  background: rgba(245, 200, 66, 0.12);
+  color: var(--gold-light);
+  border: 1px solid rgba(245, 200, 66, 0.25);
+}
+
+.badge-pending {
+  background: rgba(255, 159, 64, 0.12);
+  color: var(--amber);
+  border: 1px solid rgba(255, 159, 64, 0.25);
+}
+
+.badge-preparing {
+  background: rgba(79, 142, 255, 0.12);
+  color: var(--blue-light);
+  border: 1px solid rgba(79, 142, 255, 0.25);
+}
+
+.badge-ready {
+  background: rgba(0, 212, 184, 0.12);
+  color: var(--teal-light);
+  border: 1px solid rgba(0, 212, 184, 0.25);
+}
+
+.badge-completed {
+  background: rgba(62, 207, 142, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(62, 207, 142, 0.25);
+}
+
+.badge-cancelled {
+  background: rgba(255, 92, 138, 0.12);
+  color: var(--rose-light);
+  border: 1px solid rgba(255, 92, 138, 0.25);
+}
+
+.badge-low-stock {
+  background: rgba(255, 92, 138, 0.15);
+  color: #ff7597;
+  border: 1px solid rgba(255, 92, 138, 0.35);
+  animation: pulseGlow 2.5s infinite;
+}
+
+/* ─── 5. Modern Data Table ─── */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glass-border);
+  background: var(--bg-card);
+}
+
+.table-modern {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-modern th {
+  padding: 14px 18px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.table-modern td {
+  padding: 14px 18px;
+  font-size: 0.85rem;
+  color: var(--text-2);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background var(--t-fast);
+}
+
+.table-modern tr:last-child td {
+  border-bottom: none;
+}
+
+.table-modern tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-1);
+}
+
+/* ─── 6. Custom Modals ─── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 5, 12, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-window {
+  background: var(--bg-modal);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-backdrop.active .modal-window {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  padding: 22px 28px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.modal-body {
+  padding: 24px 28px;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 16px 28px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* ─── 7. Toast Notification Alert Stack ─── */
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 400px;
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  background: rgba(13, 18, 37, 0.95);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideInRight 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast-item.toast-success { border-color: rgba(62, 207, 142, 0.4); }
+.toast-item.toast-error   { border-color: rgba(255, 92, 138, 0.4); }
+.toast-item.toast-warning { border-color: rgba(245, 200, 66, 0.4); }
+.toast-item.toast-info    { border-color: rgba(79, 142, 255, 0.4); }

@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('DineMind AI') }}{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin_theme.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <span style="background:linear-gradient(135deg,#f5c842,#ff9f40);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#040711;font-size:16px;">🍽️</span>
+    <span>DineMind AI Admin</span>
+  </a>
+</h1>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <a href="/" class="launch-dinemind-float">
+    <span>🚀</span>
+    <span>Launch Main DineMind AI Dashboard</span>
+  </a>
+{% endblock %}
+{% block nav-global %}{% endblock %}
