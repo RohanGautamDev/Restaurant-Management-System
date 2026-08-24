@@ -1,4 +1,17 @@
-# Python
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Database & Environment
+dinemind.db
+dinemind.db-shm
+dinemind.db-wal
+.env
+
+# Python & Django (Legacy)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,9 +20,6 @@ __pycache__/
 env/
 venv/
 ENV/
-.env
-
-# Django
 *.log
 local_settings.py
 
@@ -18,6 +28,3 @@ local_settings.py
 .DS_Store
 *.swp
 *.swo
-
-# Media uploads (optional)
-# media/
