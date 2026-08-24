@@ -2,7 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "DineMind AI: Run Server",
+      "name": "DineMind AI: Run Node.js Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "DineMind AI: Run Django Server",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",

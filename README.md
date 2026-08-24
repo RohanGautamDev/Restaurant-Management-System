@@ -1,204 +1,143 @@
-# DineMind AI 🍽
+# DineMind AI 🍽️
 
 > **Smart Restaurant Operations, Simplified.**
-> A complete, production-quality full-stack Restaurant Management System built for the **CodeAlpha Backend Development Internship**.
+> A production-quality, full-stack Restaurant Management System powered by **Node.js, Express, SQLite, and Vanilla JavaScript**.
 
 ---
 
-## Features
+## 🌟 Features Overview
 
-### Mandatory (CodeAlpha Requirements)
-| Feature | Status |
-|---|---|
-| Django + Django REST Framework backend | ✅ |
-| Menu item management (CRUD) | ✅ |
-| Order management with status workflow | ✅ |
-| Table management | ✅ |
-| Reservation system with conflict prevention | ✅ |
-| Inventory management | ✅ |
-| Auto-deduct inventory on successful orders | ✅ |
-| Prevent orders when inventory insufficient | ✅ |
-| Daily sales report | ✅ |
-| Low-stock alerts | ✅ |
-| Popular menu items report | ✅ |
-| Django Admin panel | ✅ |
+### Core Restaurant Operations
+- **POS & Order Management**: Atomic order pipeline with live kitchen status updates (`Pending`, `Preparing`, `Ready`, `Completed`, `Cancelled`).
+- **Automated Inventory Sync**: Every placed order verifies recipe ingredients in real-time and deducts stock inside an ACID transaction to prevent stockouts and negative quantities.
+- **Dynamic Menu Availability**: Menu items automatically switch to `Out of Stock` whenever required ingredient reserves drop below thresholds.
+- **Interactive Table Floorplan**: Visual dining floorplan with seating state tags (`Available`, `Occupied`, `Reserved`).
+- **Smart Table Recommendation Engine**: Greedily calculates the tightest capacity fit for any party size to optimize turnover.
+- **Conflict-Checked Reservations**: Scheduled guest bookings with table assignments and collision prevention.
+- **Food Waste & Sustainability Tracking**: Logs waste incidents across reasons (spoilage, prep defect, quality) and computes real-time financial loss metrics.
+- **Operations Analytics**: 14-day revenue trends, peak-hour rush distribution (10h–23h), and top 10 dishes ranking.
 
-### Smart Features (Unique)
-| Feature | Description |
-|---|---|
-| Smart Table Recommendation | AI suggests best available table based on guest count |
-| Dynamic Menu Availability | Items auto-marked out-of-stock when ingredients run low |
-| Low Stock Intelligence | Prominent visual alerts when inventory hits threshold |
-| Peak Hour Analytics | Identifies busiest hours from order timestamps |
-| Food Waste Tracking | Log wasted inventory with cost analytics |
-| Real-Time Dashboard | Animated KPI cards with live stats |
+### Frontend & Motion UI
+- **Dark Luxury Glassmorphism**: High-contrast, accessibility-compliant dark theme with smooth glass cards.
+- **the-edge.studio Chromatic Pinwheel**: Swirling 6-color vortex iris with velocity spin acceleration and click shockwaves.
+- **Fluid Particle Mesh Canvas**: Interactive node network with velocity dispersion physics.
+- **3D Perspective Card Tilt**: Real-time holographic perspective with dynamic spotlight shader tracking.
+- **Keyboard Menu Keys**: Press keys `1` to `8` to switch sections instantly.
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-### Backend
-- Python 3.13
-- Django 5/6
-- Django REST Framework 3.x
-- SQLite
-
-### Frontend
-- HTML5, CSS3, Vanilla JavaScript
-- Fetch API (no external JS frameworks)
-- Glassmorphism dark luxury UI
-- CSS keyframe animations + mouse parallax
+- **Runtime**: Node.js v22+
+- **Backend Framework**: Express.js
+- **Database**: SQLite (`better-sqlite3`) with WAL mode & ACID transactions
+- **Frontend**: Vanilla JavaScript (Fetch API), HTML5, CSS3 Glassmorphism
+- **Motion Engine**: HTML5 Canvas 2D + SVG Chromatic Pinwheel
 
 ---
 
-## Project Structure
+## 🚀 Getting Started
 
-```
-DineMind-AI/
-├── manage.py
-├── requirements.txt
-├── db.sqlite3
-│
-├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-│
-├── restaurant/
-│   ├── __init__.py
-│   ├── apps.py
-│   ├── models.py          # All 8 database models
-│   ├── serializers.py     # DRF serializers with validation
-│   ├── views.py           # All viewsets + analytics
-│   ├── urls.py            # REST API routing
-│   ├── admin.py           # Custom admin panel
-│   └── management/
-│       └── commands/
-│           └── seed_db.py # Sample data seeder
-│
-├── templates/
-│   └── index.html         # Full SPA frontend
-│
-└── static/
-    ├── css/
-    │   └── styles.css     # Dark luxury design system
-    └── js/
-        └── app.js         # Frontend application
-```
-
----
-
-## Installation & Setup
-
-### Prerequisites
-- Python 3.10+
-- pip
-
-### 1. Clone / Open the Project
-```powershell
-cd "Restaurant Management System"
-```
+### 1. Prerequisites
+- **Node.js** (v18.0 or higher)
+- **npm** (v9.0 or higher)
 
 ### 2. Install Dependencies
 ```powershell
-pip install -r requirements.txt
+npm install
 ```
 
-### 3. Run Migrations
+### 3. Seed Sample Database
+Populates 17 menu dishes, 31 inventory ingredients, 15 tables, 210+ orders, 10 reservations, and waste logs:
 ```powershell
-python manage.py migrate
+npm run seed
 ```
 
-### 4. Seed Sample Data
+### 4. Start the Server
 ```powershell
-python manage.py seed_db
+npm start
 ```
-This creates:
-- Admin user: `admin` / `admin123`
-- 31 inventory items
-- 17 menu items with ingredients
-- 15 tables across Indoor, Outdoor, Private, Bar, Window locations
-- 5 upcoming reservations
-- 14 days of realistic order history (187+ orders)
-- 6 food waste log entries
-
-### 5. Start the Server
+*Or for hot-reload development mode:*
 ```powershell
-python manage.py runserver
+npm run dev
 ```
 
-### 6. Open in Browser
-- **Dashboard**: http://127.0.0.1:8000/
-- **Django Admin**: http://127.0.0.1:8000/admin/ (admin / admin123)
+### 5. Open in Browser
+👉 **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**
 
 ---
 
-## API Endpoints
+## 📁 Project Directory Structure
+
+```text
+Restaurant Management System/
+├── package.json              # Node.js configuration, dependencies & scripts
+├── server.js                 # Express server & static file serving
+├── dinemind.db               # SQLite database (auto-generated)
+│
+├── db/                       # Database Layer
+│   ├── database.js           # SQLite connection, schema init (8 models) & sync
+│   └── seed.js               # Database population script
+│
+├── routes/                   # REST API Route Handlers
+│   ├── dashboard.js          # /api/dashboard/stats/
+│   ├── menu.js               # /api/menu/ (CRUD & sync-all)
+│   ├── orders.js             # /api/orders/ (Atomic transaction processing)
+│   ├── tables.js             # /api/tables/ & /api/tables/recommend/
+│   ├── reservations.js       # /api/reservations/ (Booking & conflict checks)
+│   ├── inventory.js          # /api/inventory/ & /api/inventory/low-stock/
+│   ├── waste.js              # /api/waste/ & /api/waste/summary/
+│   └── reports.js            # /api/reports/ (daily sales, peak hours, popular)
+│
+├── templates/                # HTML Templates
+│   └── index.html            # Master SPA Dashboard
+│
+├── static/                   # Static Frontend Assets
+│   ├── css/
+│   │   ├── base.css          # Design tokens & typography
+│   │   ├── animations.css    # the-edge.studio pinwheel & fluid motion
+│   │   ├── components.css    # Glass cards, buttons, badges & modals
+│   │   ├── dashboard.css     # Layout, sidebar & topbar styles
+│   │   └── responsive.css    # Breakpoints & drawer navigation
+│   └── js/
+│       ├── api.js            # REST API client
+│       ├── animations.js     # Fluid canvas, 3D card tilt & pinwheel physics
+│       ├── components.js     # Modals, toasts & real-time clock
+│       ├── dashboard.js      # KPI metrics, AI insights & sales charts
+│       └── app.js            # SPA routing, menu keys & live CRUD actions
+│
+└── .vscode/                  # VS Code Integration
+    ├── launch.json           # 1-Click Run & Debug configuration (F5)
+    └── settings.json         # Workspace formatting settings
+```
+
+---
+
+## 📡 REST API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET/POST | `/api/menu/` | List / Create menu items |
-| GET/PUT/PATCH/DELETE | `/api/menu/{id}/` | Menu item detail |
-| POST | `/api/menu/sync-all/` | Sync all menu availability |
-| GET/POST | `/api/tables/` | List / Create tables |
-| GET | `/api/tables/recommend/?guests=N` | Smart table recommendation |
-| GET | `/api/tables/availability-summary/` | Table status summary |
-| GET/POST | `/api/orders/` | List / Create orders |
-| PATCH | `/api/orders/{id}/` | Update order status |
-| GET/POST | `/api/reservations/` | List / Create reservations |
-| GET/POST | `/api/inventory/` | List / Create inventory items |
-| PATCH | `/api/inventory/{id}/` | Update stock |
-| GET | `/api/inventory/low-stock/` | Low stock items |
-| GET/POST | `/api/waste/` | Log food waste |
-| GET | `/api/waste/summary/` | Waste analytics |
-| GET | `/api/dashboard/stats/` | Real-time dashboard KPIs |
-| GET | `/api/reports/daily-sales/` | Daily sales breakdown |
-| GET | `/api/reports/peak-hours/` | Peak hours analysis |
-| GET | `/api/reports/popular-items/` | Most ordered dishes |
-| GET | `/api/reports/low-stock/` | Low stock report |
-
----
-
-## Order Processing Flow
-
-```
-1. User selects table + menu items in frontend
-2. POST /api/orders/ with table_id + items[]
-3. System validates table is available (not occupied/maintenance)
-4. System checks all required ingredients across ALL items
-5. If any ingredient is insufficient → 400 error, nothing saved
-6. If all OK (inside @transaction.atomic):
-   a. Create Order record
-   b. Create OrderItem records
-   c. Deduct inventory for each ingredient
-   d. Mark table as 'occupied'
-   e. Sync menu item availability
-7. Return 201 with full order data
-```
-
----
-
-## Admin Panel Features
-- **Inventory**: Stock level badges (In Stock / Low Stock / Out of Stock)
-- **Menu Items**: Availability badges, bulk sync action
-- **Orders**: Status badges, bulk status updates, inline order items
-- **Reservations**: Date hierarchy, status management
-- **Food Waste**: Cost tracking, reason filtering
-
----
-
-## Design System
-- **Theme**: Dark luxury glassmorphism
-- **Primary Font**: Outfit (Google Fonts)
-- **Display Font**: Playfair Display
-- **Animation**: CSS keyframes + JS parallax (respects `prefers-reduced-motion`)
-- **Background**: Floating gradient orbs + grid overlay + particles
-- **Cards**: Glassmorphism with soft glow borders
-- **Colors**: Custom dark palette with gold, blue, purple, teal accents
-
----
-
-## Author
-
-Built for **CodeAlpha Backend Development Internship** as a portfolio-quality demonstration project.
+| `GET` | `/api/dashboard/stats/` | Live revenue, active orders, table counts & low-stock alerts |
+| `GET` | `/api/menu/` | List all menu dishes (filter: `?category=...`, `?available=true`) |
+| `POST` | `/api/menu/` | Create new menu item with price and category |
+| `PATCH` | `/api/menu/:id/` | Update dish details |
+| `DELETE` | `/api/menu/:id/` | Remove dish from catalog |
+| `POST` | `/api/menu/sync-all/` | Trigger catalog-wide availability recalculation |
+| `GET` | `/api/orders/` | List orders (filter: `?status=pending,preparing,ready,completed`) |
+| `POST` | `/api/orders/` | **Atomic Order Placement** with recipe stock deduction |
+| `PATCH` | `/api/orders/:id/` | Advance order lifecycle status |
+| `GET` | `/api/tables/` | List dining tables with capacity and location |
+| `GET` | `/api/tables/recommend/?guests=N` | Smart table recommendation algorithm |
+| `GET` | `/api/tables/availability-summary/` | Summary of available, occupied, and reserved tables |
+| `GET` | `/api/reservations/` | List upcoming and historical bookings |
+| `POST` | `/api/reservations/` | Create reservation & reserve table |
+| `PATCH` | `/api/reservations/:id/` | Cancel or complete reservation |
+| `GET` | `/api/inventory/` | List 31 ingredient stock reserves |
+| `PATCH` | `/api/inventory/:id/` | Restock ingredient quantity |
+| `GET` | `/api/inventory/low-stock/` | Report of all items below safety threshold |
+| `GET` | `/api/waste/` | List food waste incidents |
+| `POST` | `/api/waste/` | Log food waste incident & decrement inventory |
+| `GET` | `/api/waste/summary/` | Cumulative and 7-day financial loss metrics |
+| `GET` | `/api/reports/daily-sales/?days=7` | Daily revenue and order volume trends |
+| `GET` | `/api/reports/peak-hours/?days=14` | Hourly customer traffic distribution |
+| `GET` | `/api/reports/popular-items/?limit=10`| Top ordered dishes ranking |

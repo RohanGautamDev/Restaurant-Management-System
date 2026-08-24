@@ -1,0 +1,29 @@
+{
+  "name": "dinemind-ai",
+  "version": "2.0.0",
+  "description": "DineMind AI — Full-Stack Restaurant Management System (Node.js & Express)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node db/seed.js"
+  },
+  "keywords": [
+    "restaurant-management",
+    "pos",
+    "express",
+    "sqlite",
+    "dinemind-ai",
+    "inventory-management",
+    "reservations"
+  ],
+  "author": "Rohan",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "better-sqlite3": "^11.8.1"
+  }
+}
