@@ -1,6 +1,7 @@
 /**
  * DineMind AI — server.js
  * Express Web Server & REST API Entrypoint
+ * Compatible with both local runtime & Vercel Serverless
  */
 
 'use strict';
@@ -38,11 +39,24 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'templates', 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log('═══════════════════════════════════════════════════════');
-  console.log(`🚀 DineMind AI Node.js Server is running!`);
-  console.log(`🌐 URL: http://127.0.0.1:${PORT}/`);
-  console.log(`📦 Database: SQLite (dinemind.db)`);
-  console.log('═══════════════════════════════════════════════════════');
+// Fallback for SPA routing
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/static/')) {
+    return res.status(404).json({ error: 'Endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, 'templates', 'index.html'));
 });
+
+// Start Server when run directly (local development)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log('═══════════════════════════════════════════════════════');
+    console.log(`🚀 DineMind AI Node.js Server is running!`);
+    console.log(`🌐 URL: http://127.0.0.1:${PORT}/`);
+    console.log(`📦 Database: SQLite (dinemind.db)`);
+    console.log('═══════════════════════════════════════════════════════');
+  });
+}
+
+// Export app for Vercel Serverless Function runtime
+module.exports = app;
