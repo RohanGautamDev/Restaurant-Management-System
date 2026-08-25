@@ -623,6 +623,8 @@ const App = {
       const data = await API.get('/inventory/');
       const items = data.results || data;
 
+      const catEmoji = { produce: '🥗', meat: '🥩', seafood: '🦐', dairy: '🧀', dry: '🌾', beverage: '🍹', other: '📦' };
+
       tbody.innerHTML = items.map(i => {
         const qty = parseFloat(i.quantity);
         const threshold = parseFloat(i.min_stock_threshold);
@@ -633,11 +635,20 @@ const App = {
           statusBadge = `<span class="badge badge-low-stock">⚠️ Low Stock</span>`;
         }
 
+        const thumbHtml = i.image_url ? 
+          `<img src="${i.image_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;" alt="${i.name}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;\\'>${catEmoji[i.category] || '📦'}</span>'">` :
+          `<span style="font-size:1.5rem;">${catEmoji[i.category] || '📦'}</span>`;
+
         return `
           <tr>
             <td>
-              <div class="text-1 font-bold">${i.name}</div>
-              <div class="text-3 text-xs">Cost: $${parseFloat(i.cost_per_unit).toFixed(2)} / ${i.unit}</div>
+              <div class="flex items-center gap-12">
+                ${thumbHtml}
+                <div>
+                  <div class="text-1 font-bold">${i.name}</div>
+                  <div class="text-3 text-xs">Cost: $${parseFloat(i.cost_per_unit || 0).toFixed(2)} / ${i.unit} ${i.supplier_name ? `· ${i.supplier_name}` : ''}</div>
+                </div>
+              </div>
             </td>
             <td>
               <div class="text-1 font-bold text-md font-mono">${qty.toFixed(2)} ${i.unit}</div>
@@ -650,6 +661,7 @@ const App = {
               <div class="flex gap-8">
                 <button class="btn btn-teal btn-sm" onclick="App.openRestockModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.unit}')">📦 Restock</button>
                 <button class="btn btn-danger btn-sm" onclick="App.openWasteLogModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.unit}')">🗑️ Waste</button>
+                <button class="btn btn-ghost btn-sm p-4" onclick="App.deleteIngredient(${i.id}, '${i.name.replace(/'/g, "\\'")}')" title="Delete Ingredient">❌</button>
               </div>
             </td>
           </tr>
@@ -657,6 +669,61 @@ const App = {
       }).join('');
     } catch (err) {
       UI.showToast('Failed to load inventory stock.', 'error');
+    }
+  },
+
+  openAddIngredientModal() {
+    document.getElementById('form-add-ingredient').reset();
+    UI.openModal('modal-add-ingredient');
+  },
+
+  async submitNewIngredient() {
+    const name = document.getElementById('ing-name').value;
+    const category = document.getElementById('ing-category').value;
+    const imageUrl = document.getElementById('ing-image-url').value;
+    const quantity = document.getElementById('ing-quantity').value;
+    const unit = document.getElementById('ing-unit').value;
+    const minThreshold = document.getElementById('ing-min-threshold').value;
+    const costPerUnit = document.getElementById('ing-cost-per-unit').value;
+    const supplierName = document.getElementById('ing-supplier-name').value;
+    const supplierContact = document.getElementById('ing-supplier-contact').value;
+
+    if (!name || !name.trim()) {
+      UI.showToast('Ingredient Name is required.', 'warning');
+      return;
+    }
+
+    try {
+      await API.post('/inventory/', {
+        name,
+        category,
+        image_url: imageUrl,
+        quantity: parseFloat(quantity) || 0,
+        unit,
+        min_stock_threshold: parseFloat(minThreshold) || 3,
+        cost_per_unit: parseFloat(costPerUnit) || 0,
+        supplier_name: supplierName,
+        supplier_contact: supplierContact
+      });
+
+      UI.showToast(`Custom Ingredient "${name}" created!`, 'success');
+      UI.closeModal('modal-add-ingredient');
+      this.loadInventory();
+      Dashboard.load();
+    } catch (err) {
+      UI.showToast(err.message || 'Failed to save ingredient.', 'error');
+    }
+  },
+
+  async deleteIngredient(itemId, name) {
+    if (!confirm(`Are you sure you want to remove ingredient "${name}" from inventory?`)) return;
+    try {
+      await API.delete(`/inventory/${itemId}/`);
+      UI.showToast(`Ingredient "${name}" deleted.`, 'info');
+      this.loadInventory();
+      Dashboard.load();
+    } catch (err) {
+      UI.showToast(err.message || 'Failed to delete ingredient.', 'error');
     }
   },
 

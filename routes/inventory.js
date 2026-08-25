@@ -89,4 +89,66 @@ router.patch('/:id', (req, res) => {
   }
 });
 
+// POST /api/inventory/ — Add new custom ingredient with photo URL & details
+router.post('/', (req, res) => {
+  try {
+    const {
+      name,
+      category = 'other',
+      quantity = 0.0,
+      unit = 'kg',
+      min_stock_threshold = 5.0,
+      cost_per_unit = 0.0,
+      supplier_name = '',
+      supplier_contact = '',
+      image_url = '',
+    } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Ingredient name is required.' });
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO inventory_items (name, category, quantity, unit, min_stock_threshold, cost_per_unit, supplier_name, supplier_contact, image_url, last_restocked, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `);
+
+    const result = stmt.run(
+      name.trim(),
+      category,
+      parseFloat(quantity) || 0.0,
+      unit.trim() || 'kg',
+      parseFloat(min_stock_threshold) || 5.0,
+      parseFloat(cost_per_unit) || 0.0,
+      supplier_name.trim(),
+      supplier_contact.trim(),
+      image_url.trim()
+    );
+
+    const newItem = db.prepare('SELECT * FROM inventory_items WHERE id = ?').get(result.lastInsertRowid);
+    syncMenuAvailability();
+    res.status(201).json(newItem);
+  } catch (err) {
+    if (err.message && err.message.includes('UNIQUE constraint failed')) {
+      return res.status(400).json({ error: `An ingredient named "${req.body.name}" already exists.` });
+    }
+    console.error('Create Inventory Error:', err);
+    res.status(500).json({ error: 'Failed to create inventory ingredient.' });
+  }
+});
+
+// DELETE /api/inventory/:id/ — Delete ingredient
+router.delete('/:id', (req, res) => {
+  try {
+    const item = db.prepare('SELECT * FROM inventory_items WHERE id = ?').get(req.params.id);
+    if (!item) return res.status(404).json({ error: 'Inventory item not found.' });
+
+    db.prepare('DELETE FROM inventory_items WHERE id = ?').run(req.params.id);
+    syncMenuAvailability();
+    res.json({ message: `Ingredient "${item.name}" deleted successfully.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete inventory ingredient.' });
+  }
+});
+
 module.exports = router;

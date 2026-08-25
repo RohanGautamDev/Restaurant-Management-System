@@ -49,6 +49,7 @@ function initSchema() {
       cost_per_unit REAL NOT NULL DEFAULT 0.0,
       supplier_name TEXT DEFAULT '',
       supplier_contact TEXT DEFAULT '',
+      image_url TEXT DEFAULT '',
       last_restocked TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
@@ -171,6 +172,12 @@ function syncMenuAvailability(menuItemId = null) {
 }
 
 initSchema();
+
+try {
+  db.exec("ALTER TABLE inventory_items ADD COLUMN image_url TEXT DEFAULT ''");
+} catch (e) {
+  // Column already exists
+}
 
 module.exports = {
   db,

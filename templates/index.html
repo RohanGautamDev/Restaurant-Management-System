@@ -548,8 +548,9 @@
           <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
             <div>
               <h2 class="font-display text-2xl font-bold">Inventory Command Center</h2>
-              <p class="text-3 text-sm">Real-time ingredient stock levels, safety thresholds, and automatic deduction.</p>
+              <p class="text-3 text-sm">Real-time ingredient stock levels, safety thresholds, and custom ingredient manager.</p>
             </div>
+            <button class="btn btn-gold" onclick="App.openAddIngredientModal()">+ Add Custom Ingredient</button>
           </div>
 
           <div class="table-container">
@@ -834,6 +835,81 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-new-reservation')">Cancel</button>
           <button type="submit" class="btn btn-gold">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Add Ingredient with Photo & Details -->
+  <div class="modal-backdrop" id="modal-add-ingredient">
+    <div class="modal-window" style="max-width:640px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📦 Add Custom Ingredient</h3>
+        <button type="button" class="btn btn-ghost btn-sm p-4" onclick="UI.closeModal('modal-add-ingredient')">✕</button>
+      </div>
+      <form id="form-add-ingredient" onsubmit="event.preventDefault(); App.submitNewIngredient();">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Ingredient Name *</label>
+              <input type="text" id="ing-name" class="form-control" placeholder="e.g. Organic Extra Virgin Olive Oil" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="ing-category" class="form-control">
+                <option value="produce">Produce & Herbs</option>
+                <option value="meat">Meat & Poultry</option>
+                <option value="seafood">Seafood</option>
+                <option value="dairy">Dairy & Eggs</option>
+                <option value="dry" selected>Dry & Pantry</option>
+                <option value="beverage">Beverage & Bar</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ingredient Photo URL / Image Link (Optional)</label>
+            <input type="url" id="ing-image-url" class="form-control" placeholder="https://images.unsplash.com/... or image link">
+            <div class="text-3 text-xs mt-4">Add a web photo link to show a live thumbnail for this ingredient.</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Initial Quantity *</label>
+              <input type="number" id="ing-quantity" class="form-control" step="0.01" min="0" placeholder="10.0" value="10.0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit of Measure *</label>
+              <input type="text" id="ing-unit" class="form-control" placeholder="kg, liters, units, grams" value="kg" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Min Safety Threshold</label>
+              <input type="number" id="ing-min-threshold" class="form-control" step="0.1" min="0" placeholder="3.0" value="3.0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cost per Unit ($ USD)</label>
+              <input type="number" id="ing-cost-per-unit" class="form-control" step="0.01" min="0" placeholder="5.50" value="2.50">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Supplier Name</label>
+              <input type="text" id="ing-supplier-name" class="form-control" placeholder="e.g. Heritage Farm Supply">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supplier Contact Email/Phone</label>
+              <input type="text" id="ing-supplier-contact" class="form-control" placeholder="orders@heritage.com">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-add-ingredient')">Cancel</button>
+          <button type="submit" class="btn btn-gold">📦 Save Ingredient</button>
         </div>
       </form>
     </div>
