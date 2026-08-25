@@ -163,6 +163,7 @@ router.post('/', (req, res) => {
       return {
         id: orderId,
         table_id,
+        table_number: table.table_number,
         status: 'pending',
         total_amount: parseFloat(totalAmount.toFixed(2)),
         notes,

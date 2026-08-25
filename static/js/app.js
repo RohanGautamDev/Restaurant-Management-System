@@ -171,7 +171,7 @@ const App = {
           <div>
             <div class="flex items-center justify-between mb-8">
               <span class="font-mono font-bold text-gold text-base">#ORD-${o.id}</span>
-              <span class="badge badge-preparing" style="font-size:0.85rem;padding:4px 10px;">Table ${o.table_number || o.table || '—'}</span>
+              <span class="badge badge-preparing" style="font-size:0.85rem;padding:4px 10px;">Table ${(o.table_number !== undefined && o.table_number !== null) ? o.table_number : (o.table_id || o.table || '—')}</span>
             </div>
             <div class="text-3 text-xs mb-8 flex items-center gap-6 font-mono">
               <span>⏰ ${new Date(o.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
@@ -249,7 +249,7 @@ const App = {
         <tr>
           <td><span class="font-mono text-1 font-bold">#ORD-${o.id}</span></td>
           <td>
-            <div class="text-1 font-bold">Table ${o.table_number || o.table || '—'}</div>
+            <div class="text-1 font-bold">Table ${(o.table_number !== undefined && o.table_number !== null) ? o.table_number : (o.table_id || o.table || '—')}</div>
             <div class="text-3 text-xs">${(o.items || []).length} items ordered</div>
           </td>
           <td>
