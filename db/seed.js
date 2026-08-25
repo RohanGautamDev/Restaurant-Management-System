@@ -88,7 +88,7 @@ function seedDatabase() {
 
   const menuData = [
     // Starters
-    ['Bruschetta al Pomodoro', 'starter', 12.50, 'Toasted sourdough with vine ripe tomatoes, fresh basil, garlic, and EVOO.', 1, 'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=600&auto=format&fit=crop&q=80', 1, 10, 0, [
+    ['Bruschetta al Pomodoro', 'starter', 12.50, 'Toasted sourdough with vine ripe tomatoes, fresh basil, garlic, and EVOO.', 1, '/static/images/bruschetta.jpg', 1, 10, 0, [
       ['Roma Tomatoes', 0.15], ['Fresh Basil', 0.02], ['Garlic Bulbs', 0.01], ['Extra Virgin Olive Oil', 0.03]
     ]],
     ['Crispy Calamari & Tiger Prawns', 'starter', 16.00, 'Flash-fried tiger prawns and calamari rings with lemon garlic aioli.', 1, 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=600&auto=format&fit=crop&q=80', 0, 12, 1, [
@@ -102,10 +102,10 @@ function seedDatabase() {
     ]],
 
     // Mains
-    ['Charcoal Grilled Ribeye Steak', 'main', 38.00, 'Prime USDA ribeye steak, roasted garlic compound butter, truffle fries.', 1, 'https://images.unsplash.com/photo-1558030006-450675393462?w=600&auto=format&fit=crop&q=80', 0, 22, 0, [
+    ['Charcoal Grilled Ribeye Steak', 'main', 38.00, 'Prime USDA ribeye steak, roasted garlic compound butter, truffle fries.', 1, '/static/images/ribeye_steak.jpg', 0, 22, 0, [
       ['Prime Beef Ribeye', 0.35], ['Unsalted Butter', 0.04], ['Garlic Bulbs', 0.02]
     ]],
-    ['Pan-Seared Atlantic Salmon', 'main', 29.50, 'Crispy skin salmon fillet over saffron arborio risotto and baby spinach.', 1, 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&auto=format&fit=crop&q=80', 0, 18, 0, [
+    ['Pan-Seared Atlantic Salmon', 'main', 29.50, 'Crispy skin salmon fillet over saffron arborio risotto and baby spinach.', 1, '/static/images/salmon.jpg', 0, 18, 0, [
       ['Atlantic Salmon Fillet', 0.22], ['Arborio Rice', 0.08], ['Baby Spinach', 0.06], ['Heavy Cream 35%', 0.04], ['Unsalted Butter', 0.02]
     ]],
     ['Classic Chicken Parmigiana', 'main', 24.50, 'Breaded chicken breast baked with San Marzano sauce and aged mozzarella.', 1, 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=600&auto=format&fit=crop&q=80', 0, 18, 0, [
@@ -122,7 +122,10 @@ function seedDatabase() {
     ]],
 
     // Desserts
-    ['Classic Venetian Tiramisu', 'dessert', 10.50, 'Espresso-soaked savoiardi biscuits layered with mascarpone and cocoa.', 1, 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&auto=format&fit=crop&q=80', 1, 5, 0, [
+    ['Pure Chocolate Bal Mithai', 'dessert', 14.00, 'Authentic Himalayan desi fudge-like sweet made with roasted khoya, cocoa, and coated with sugar pearls.', 1, '/static/images/bal_mithai.jpg', 1, 10, 0, [
+      ['Cane Sugar', 0.10], ['Whole Milk', 0.20], ['Dark Chocolate 70%', 0.05]
+    ]],
+    ['Classic Venetian Tiramisu', 'dessert', 10.50, 'Espresso-soaked savoiardi biscuits layered with mascarpone and cocoa.', 1, '/static/images/tiramisu.jpg', 1, 5, 0, [
       ['Espresso Beans (Single Origin)', 0.03], ['Eggs (Large)', 2], ['Heavy Cream 35%', 0.08], ['Cane Sugar', 0.04]
     ]],
     ['Warm Molten Chocolate Lava Cake', 'dessert', 11.50, '70% Valrhona dark chocolate cake with liquid center and vanilla gelato.', 1, 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80', 1, 14, 0, [
