@@ -29,7 +29,7 @@ const App = {
     setInterval(() => {
       if (document.hidden) return; // Don't poll when tab is backgrounded
       this.refreshCurrentViewSilently();
-    }, 3000);
+    }, 6000);
   },
 
   async refreshCurrentViewSilently() {

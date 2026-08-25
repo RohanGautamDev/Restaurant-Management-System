@@ -244,24 +244,39 @@ const Motion = {
   },
 
   // ─── 7. Smooth Number Counter Animation ───
-  animateCounter(element, targetValue, duration = 1200, prefix = '', suffix = '') {
+  animateCounter(element, targetValue, duration = 1000, prefix = '', suffix = '') {
     if (!element) return;
-    const startValue = 0;
-    const startTime = performance.now();
+    const numTarget = Number(targetValue) || 0;
     const isFloat = String(targetValue).includes('.');
+    
+    // Read previous numeric value to transition smoothly without zero-reset flickering
+    const currentText = element.textContent ? element.textContent.replace(/[^0-9.-]/g, '') : '';
+    const prevVal = element.dataset.value !== undefined ? Number(element.dataset.value) : (currentText ? parseFloat(currentText) || 0 : 0);
+    
+    element.dataset.value = numTarget;
+
+    // Do nothing if value hasn't changed
+    if (prevVal === numTarget && element.dataset.initialized === 'true') {
+      element.textContent = prefix + (isFloat ? numTarget.toFixed(2) : numTarget) + suffix;
+      return;
+    }
+
+    element.dataset.initialized = 'true';
+    const startValue = prevVal;
+    const startTime = performance.now();
 
     function step(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const easeProgress = 1 - Math.pow(1 - progress, 3);
-      const currentValue = startValue + (targetValue - startValue) * easeProgress;
+      const currentValue = startValue + (numTarget - startValue) * easeProgress;
 
       element.textContent = prefix + (isFloat ? currentValue.toFixed(2) : Math.floor(currentValue)) + suffix;
 
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        element.textContent = prefix + (isFloat ? Number(targetValue).toFixed(2) : targetValue) + suffix;
+        element.textContent = prefix + (isFloat ? numTarget.toFixed(2) : numTarget) + suffix;
       }
     }
 

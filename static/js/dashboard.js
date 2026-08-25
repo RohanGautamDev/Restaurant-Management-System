@@ -107,7 +107,7 @@ const Dashboard = {
       });
     }
 
-    container.innerHTML = insights.map(item => `
+    const html = insights.map(item => `
       <div class="ai-insight-item">
         <div class="ai-insight-icon">${item.icon}</div>
         <div style="flex:1;">
@@ -116,6 +116,10 @@ const Dashboard = {
         </div>
       </div>
     `).join('');
+
+    if (container.innerHTML !== html) {
+      container.innerHTML = html;
+    }
   },
 
   renderSalesChart(data) {
@@ -130,7 +134,7 @@ const Dashboard = {
 
     const maxRevenue = Math.max(...days.map(d => d.revenue), 10);
 
-    chartContainer.innerHTML = `
+    const html = `
       <div class="sales-bar-chart">
         ${days.map(d => {
           const heightPct = Math.max(8, Math.round((d.revenue / maxRevenue) * 100));
@@ -149,6 +153,10 @@ const Dashboard = {
         <span style="color:var(--gold-light);font-weight:600;">Today: $${(data.today?.revenue || 0).toFixed(2)}</span>
       </div>
     `;
+
+    if (chartContainer.innerHTML !== html) {
+      chartContainer.innerHTML = html;
+    }
   },
 
   renderPeakHours(data) {
@@ -162,7 +170,7 @@ const Dashboard = {
     }
 
     const maxOrders = Math.max(...hours.map(h => h.order_count), 1);
-    container.innerHTML = `
+    const html = `
       <div style="display:flex;align-items:flex-end;gap:4px;height:90px;padding:6px 0;">
         ${hours.map(h => {
           const pct = Math.max(10, Math.round((h.order_count / maxOrders) * 100));
@@ -176,6 +184,10 @@ const Dashboard = {
         }).join('')}
       </div>
     `;
+
+    if (container.innerHTML !== html) {
+      container.innerHTML = html;
+    }
   },
 
   renderLowStockAlert(data) {
