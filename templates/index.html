@@ -72,6 +72,10 @@
           <span class="nav-icon">📊</span>
           <span>Dashboard</span>
         </a>
+        <a class="nav-item" data-route="kitchen" onclick="App.navigate('kitchen'); return false;">
+          <span class="nav-icon">👨‍🍳</span>
+          <span>Kitchen Display (KDS)</span>
+        </a>
         <a class="nav-item" data-route="orders" onclick="App.navigate('orders'); return false;">
           <span class="nav-icon">📋</span>
           <span>Orders</span>
@@ -132,7 +136,7 @@
         </div>
 
         <div class="topbar-right">
-          <div class="live-status-pill">
+          <div class="live-status-pill pointer" onclick="App.navigate('kitchen')" title="Click to open Live Kitchen Display System (KDS)">
             <span class="status-dot"></span>
             <span>Kitchen & Pos Live</span>
           </div>
@@ -327,6 +331,72 @@
 
           </div>
 
+        </section>
+
+        <!-- ==============================================
+             VIEW: KITCHEN DISPLAY SYSTEM (KDS)
+             ============================================== -->
+        <section id="view-kitchen" class="view-section">
+          <div class="flex items-center justify-between mb-24 flex-wrap gap-12">
+            <div>
+              <div class="flex items-center gap-8 mb-4">
+                <span class="badge badge-preparing">🔥 Live KDS Queue</span>
+                <h2 class="font-display text-2xl font-bold">Kitchen Display System</h2>
+              </div>
+              <p class="text-3 text-sm">Real-time live ticket board for line cooks, chefs, and kitchen staff.</p>
+            </div>
+            <div class="flex gap-8">
+              <button class="btn btn-glass btn-sm" onclick="App.loadKitchenView()">🔄 Refresh Board</button>
+              <button class="btn btn-gold btn-sm" onclick="App.openNewOrderModal()">+ New POS Order</button>
+            </div>
+          </div>
+
+          <!-- KDS 3-Column Ticket Board -->
+          <div class="grid gap-20" style="grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));">
+            
+            <!-- Column 1: Pending (New Incoming Orders) -->
+            <div class="card-glass p-16" style="border-color:rgba(0,210,255,0.3);background:rgba(0,210,255,0.03);">
+              <div class="flex items-center justify-between mb-16 pb-8" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div class="flex items-center gap-8">
+                  <span class="status-dot" style="background:#00d2ff;"></span>
+                  <h3 class="font-bold text-md text-1">Pending Tickets</h3>
+                </div>
+                <span class="badge badge-pending" id="kds-pending-count">0</span>
+              </div>
+              <div id="kds-column-pending" class="flex flex-col gap-12" style="min-height:300px;">
+                <div class="text-center text-3 text-xs p-24">No pending orders.</div>
+              </div>
+            </div>
+
+            <!-- Column 2: Preparing (In Cooking) -->
+            <div class="card-glass p-16" style="border-color:rgba(255,146,51,0.3);background:rgba(255,146,51,0.03);">
+              <div class="flex items-center justify-between mb-16 pb-8" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div class="flex items-center gap-8">
+                  <span class="status-dot" style="background:#ff9233;"></span>
+                  <h3 class="font-bold text-md text-1">In Preparation</h3>
+                </div>
+                <span class="badge badge-preparing" id="kds-preparing-count">0</span>
+              </div>
+              <div id="kds-column-preparing" class="flex flex-col gap-12" style="min-height:300px;">
+                <div class="text-center text-3 text-xs p-24">No orders currently cooking.</div>
+              </div>
+            </div>
+
+            <!-- Column 3: Ready for Service -->
+            <div class="card-glass p-16" style="border-color:rgba(56,239,125,0.3);background:rgba(56,239,125,0.03);">
+              <div class="flex items-center justify-between mb-16 pb-8" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div class="flex items-center gap-8">
+                  <span class="status-dot" style="background:#38ef7d;"></span>
+                  <h3 class="font-bold text-md text-1">Ready for Service</h3>
+                </div>
+                <span class="badge badge-completed" id="kds-ready-count">0</span>
+              </div>
+              <div id="kds-column-ready" class="flex flex-col gap-12" style="min-height:300px;">
+                <div class="text-center text-3 text-xs p-24">No plated orders waiting.</div>
+              </div>
+            </div>
+
+          </div>
         </section>
 
         <!-- ==============================================

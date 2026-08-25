@@ -34,7 +34,9 @@ const App = {
 
   async refreshCurrentViewSilently() {
     try {
-      if (this.currentView === 'orders') {
+      if (this.currentView === 'kitchen') {
+        await this.loadKitchenView(true);
+      } else if (this.currentView === 'orders') {
         await this.loadOrders(this.activeOrdersFilter, true);
       } else if (this.currentView === 'dashboard') {
         await Dashboard.load();
@@ -109,6 +111,9 @@ const App = {
       case 'dashboard':
         Dashboard.load();
         break;
+      case 'kitchen':
+        this.loadKitchenView();
+        break;
       case 'orders':
         this.loadOrders();
         break;
@@ -133,6 +138,90 @@ const App = {
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  // ═════════════════════════════════════════════════════
+  // KITCHEN DISPLAY SYSTEM (KDS)
+  // ═════════════════════════════════════════════════════
+  async loadKitchenView(isSilent = false) {
+    const colPending = document.getElementById('kds-column-pending');
+    const colPreparing = document.getElementById('kds-column-preparing');
+    const colReady = document.getElementById('kds-column-ready');
+
+    if (!colPending || !colPreparing || !colReady) return;
+
+    try {
+      const data = await API.get('/orders/');
+      const orders = data.results || data;
+
+      const pendingList = orders.filter(o => o.status === 'pending');
+      const preparingList = orders.filter(o => o.status === 'preparing');
+      const readyList = orders.filter(o => o.status === 'ready');
+
+      // Update counters
+      const countP = document.getElementById('kds-pending-count');
+      const countPr = document.getElementById('kds-preparing-count');
+      const countR = document.getElementById('kds-ready-count');
+      if (countP) countP.textContent = pendingList.length;
+      if (countPr) countPr.textContent = preparingList.length;
+      if (countR) countR.textContent = readyList.length;
+
+      const renderTicketCard = (o, accentColor, buttonHtml) => `
+        <div class="card-glass p-16 flex flex-col justify-between mb-12" style="border-left:4px solid ${accentColor};">
+          <div>
+            <div class="flex items-center justify-between mb-8">
+              <span class="font-mono font-bold text-gold text-base">#ORD-${o.id}</span>
+              <span class="badge badge-preparing" style="font-size:0.85rem;padding:4px 10px;">Table ${o.table_number || o.table || '—'}</span>
+            </div>
+            <div class="text-3 text-xs mb-8 flex items-center gap-6 font-mono">
+              <span>⏰ ${new Date(o.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="divider" style="margin:8px 0;"></div>
+            <div class="flex flex-col gap-6 mb-12">
+              ${(o.items || []).map(i => `
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-1 font-bold">${i.quantity}x ${i.menu_item_name}</span>
+                  <span class="text-3 text-xs uppercase">${i.menu_item_category || ''}</span>
+                </div>
+              `).join('')}
+            </div>
+            ${o.notes ? `<div class="p-8 text-xs text-amber card-glass mb-12">💡 Note: ${o.notes}</div>` : ''}
+          </div>
+          <div class="mt-8 pt-8 flex gap-8" style="border-top:1px solid rgba(255,255,255,0.06);">
+            ${buttonHtml}
+          </div>
+        </div>
+      `;
+
+      // Render Pending Column
+      const pendingHtml = pendingList.length === 0 ? '<div class="text-center text-3 text-xs p-24">No pending tickets.</div>' :
+        pendingList.map(o => renderTicketCard(o, '#00d2ff', `
+          <button class="btn btn-blue btn-sm flex-1" onclick="App.updateOrderStatus(${o.id}, 'preparing')">👨‍🍳 Start Preparing</button>
+          <button class="btn btn-danger btn-sm" onclick="App.updateOrderStatus(${o.id}, 'cancelled')">Cancel</button>
+        `)).join('');
+
+      // Render Preparing Column
+      const preparingHtml = preparingList.length === 0 ? '<div class="text-center text-3 text-xs p-24">No orders currently cooking.</div>' :
+        preparingList.map(o => renderTicketCard(o, '#ff9233', `
+          <button class="btn btn-teal btn-sm flex-1" onclick="App.updateOrderStatus(${o.id}, 'ready')">🔔 Mark Ready</button>
+        `)).join('');
+
+      // Render Ready Column
+      const readyHtml = readyList.length === 0 ? '<div class="text-center text-3 text-xs p-24">No plated orders waiting.</div>' :
+        readyList.map(o => renderTicketCard(o, '#38ef7d', `
+          <button class="btn btn-gold btn-sm flex-1" onclick="App.updateOrderStatus(${o.id}, 'completed')">✨ Complete</button>
+        `)).join('');
+
+      if (!isSilent || colPending.innerHTML !== pendingHtml) colPending.innerHTML = pendingHtml;
+      if (!isSilent || colPreparing.innerHTML !== preparingHtml) colPreparing.innerHTML = preparingHtml;
+      if (!isSilent || colReady.innerHTML !== readyHtml) colReady.innerHTML = readyHtml;
+
+    } catch (err) {
+      if (!isSilent) {
+        console.error(err);
+        UI.showToast('Failed to refresh Kitchen Display board.', 'error');
+      }
+    }
   },
 
   // ═════════════════════════════════════════════════════
@@ -205,7 +294,11 @@ const App = {
     try {
       await API.patch(`/orders/${orderId}/`, { status: newStatus });
       UI.showToast(`Order #${orderId} updated to ${newStatus}.`, 'success');
-      this.loadOrders();
+      if (this.currentView === 'kitchen') {
+        this.loadKitchenView();
+      } else {
+        this.loadOrders();
+      }
       Dashboard.load();
     } catch (err) {
       UI.showToast(err.message || 'Status update failed.', 'error');
@@ -340,7 +433,11 @@ const App = {
       const result = await API.post('/orders/', payload);
       UI.showToast(`Order #ORD-${result.id} placed & inventory updated!`, 'success');
       UI.closeModal('modal-new-order');
-      this.loadOrders();
+      if (this.currentView === 'kitchen') {
+        this.loadKitchenView();
+      } else {
+        this.loadOrders();
+      }
       Dashboard.load();
     } catch (err) {
       UI.showToast(err.message || 'Failed to place order.', 'error');

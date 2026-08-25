@@ -257,6 +257,15 @@
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--green);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.live-status-pill:hover {
+  background: rgba(62, 207, 142, 0.2);
+  border-color: rgba(62, 207, 142, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(62, 207, 142, 0.3);
 }
 
 .live-clock {
