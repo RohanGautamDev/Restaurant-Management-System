@@ -28,7 +28,6 @@
 .card-glass:hover {
   border-color: var(--glass-border-hover);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-3px);
   background: var(--bg-card-hover);
 }
 

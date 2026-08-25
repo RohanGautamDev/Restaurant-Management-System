@@ -284,7 +284,22 @@
   to   { transform: rotate(360deg); }
 }
 
-/* ─── 9. Accessibility: Reduced Motion ─── */
+/* ─── 9. Accessibility: Reduced Motion & Zero-Shift Cards ─── */
+.card-glass,
+.card-glass:hover,
+.kpi-card,
+.kpi-card:hover,
+.table-node,
+.table-node:hover,
+.menu-dish-card,
+.menu-dish-card:hover,
+.ai-insight-item,
+.ai-insight-item:hover,
+.btn,
+.btn:hover {
+  transform: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   #custom-cursor-dot, #custom-cursor-ring { display: none !important; }
   .orb, .bg-mesh, .kinetic-marquee-track, .edge-pinwheel-svg, .edge-pinwheel-glow { animation: none !important; }
