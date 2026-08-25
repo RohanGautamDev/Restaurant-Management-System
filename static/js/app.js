@@ -19,6 +19,31 @@ const App = {
 
     this.bindNavigation();
     this.navigate('dashboard');
+    this.startLiveSync();
+  },
+
+  activeOrdersFilter: 'all',
+
+  // Real-Time Live Sync Engine for POS & Kitchen Display
+  startLiveSync() {
+    setInterval(() => {
+      if (document.hidden) return; // Don't poll when tab is backgrounded
+      this.refreshCurrentViewSilently();
+    }, 3000);
+  },
+
+  async refreshCurrentViewSilently() {
+    try {
+      if (this.currentView === 'orders') {
+        await this.loadOrders(this.activeOrdersFilter, true);
+      } else if (this.currentView === 'dashboard') {
+        await Dashboard.load();
+      } else if (this.currentView === 'tables') {
+        await this.loadTables(true);
+      }
+    } catch (err) {
+      // Ignore background sync errors
+    }
   },
 
   // ─── SPA Navigation & Keyboard Menu Keys ───
@@ -113,7 +138,8 @@ const App = {
   // ═════════════════════════════════════════════════════
   // 1. ORDER MANAGEMENT
   // ═════════════════════════════════════════════════════
-  async loadOrders(statusFilter = 'all') {
+  async loadOrders(statusFilter = 'all', isSilent = false) {
+    this.activeOrdersFilter = statusFilter;
     const listEl = document.getElementById('orders-table-body');
     if (!listEl) return;
 
@@ -130,7 +156,7 @@ const App = {
         return;
       }
 
-      listEl.innerHTML = orders.map(o => `
+      const html = orders.map(o => `
         <tr>
           <td><span class="font-mono text-1 font-bold">#ORD-${o.id}</span></td>
           <td>
@@ -163,9 +189,15 @@ const App = {
           </td>
         </tr>
       `).join('');
+
+      if (!isSilent || listEl.innerHTML !== html) {
+        listEl.innerHTML = html;
+      }
     } catch (err) {
-      console.error(err);
-      UI.showToast('Failed to load orders.', 'error');
+      if (!isSilent) {
+        console.error(err);
+        UI.showToast('Failed to load orders.', 'error');
+      }
     }
   },
 
@@ -318,7 +350,7 @@ const App = {
   // ═════════════════════════════════════════════════════
   // 2. TABLE MANAGEMENT
   // ═════════════════════════════════════════════════════
-  async loadTables() {
+  async loadTables(isSilent = false) {
     const gridEl = document.getElementById('tables-floor-grid');
     if (!gridEl) return;
 
@@ -329,7 +361,7 @@ const App = {
 
       const locIcons = { indoor: '🪑', outdoor: '🌿', private: '💎', bar: '🍸', window: '🌅' };
 
-      gridEl.innerHTML = tables.map(t => `
+      const html = tables.map(t => `
         <div class="card-glass table-node ${t.status}" onclick="App.inspectTable(${t.id})">
           <div style="font-size:1.6rem;margin-bottom:6px;">${locIcons[t.location] || '🪑'}</div>
           <div class="table-number-label">Table ${t.table_number}</div>
@@ -339,8 +371,14 @@ const App = {
           </div>
         </div>
       `).join('');
+
+      if (!isSilent || gridEl.innerHTML !== html) {
+        gridEl.innerHTML = html;
+      }
     } catch (err) {
-      UI.showToast('Could not load tables floorplan.', 'error');
+      if (!isSilent) {
+        UI.showToast('Could not load tables floorplan.', 'error');
+      }
     }
   },
 
