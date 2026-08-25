@@ -16,8 +16,7 @@ const Motion = {
   init() {
     this.initMouseTracking();
     this.initFluidCanvas();
-    this.initCard3DTilt();
-    this.initMagneticButtons();
+    // 3D card tilt and magnetic button pulling disabled for flat, stable, non-zigzagging boxes
     this.initParallaxOrbs();
     this.initClickRipples();
     this.initPinwheelPhysics();
@@ -152,66 +151,12 @@ const Motion = {
 
   // ─── 3. Card 3D Perspective Tilt & Dynamic Spotlight Shader ───
   initCard3DTilt() {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-
-    document.addEventListener('mousemove', (e) => {
-      const cards = document.querySelectorAll('.card-glass, .kpi-card, .table-node, .hero-banner');
-
-      cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        const cardX = e.clientX - rect.left;
-        const cardY = e.clientY - rect.top;
-
-        // Update spotlight position variables on card
-        card.style.setProperty('--mouse-x', `${cardX}px`);
-        card.style.setProperty('--mouse-y', `${cardY}px`);
-
-        // If hovered inside bounds, calculate 3D tilt
-        if (
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom
-        ) {
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const tiltX = (cardY - centerY) / centerY * -6; // max 6 deg
-          const tiltY = (cardX - centerX) / centerX * 6;
-
-          card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-3px)`;
-        }
-      });
-    });
-
-    // Reset tilt on mouseleave
-    document.addEventListener('mouseout', (e) => {
-      const card = e.target.closest('.card-glass, .kpi-card, .table-node, .hero-banner');
-      if (card) {
-        card.style.transform = '';
-      }
-    });
+    // Disabled to prevent 3D box twisting/zigzagging when moving cursor
   },
 
   // ─── 4. Magnetic Button Micro-Physics ───
   initMagneticButtons() {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-
-    const magneticElements = document.querySelectorAll('.btn, .sidebar-logo-icon, .sidebar-toggle-btn');
-
-    magneticElements.forEach(btn => {
-      btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-
-        // Pull effect
-        btn.style.transform = `translate3d(${x * 0.25}px, ${y * 0.25}px, 0)`;
-      });
-
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = 'translate3d(0, 0, 0)';
-      });
-    });
+    // Disabled to keep buttons steady and easy to click
   },
 
   // ─── 5. Parallax Floating Orbs ───
