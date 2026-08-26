@@ -603,13 +603,28 @@ textarea.form-control {
   inset: 0;
   z-index: 9999;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
-  background: radial-gradient(circle at center, rgba(13, 18, 38, 0.88) 0%, rgba(6, 9, 20, 0.96) 100%);
+  padding: 24px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: radial-gradient(circle at center, rgba(13, 18, 38, 0.92) 0%, rgba(6, 9, 20, 0.98) 100%);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Center card vertically when there's enough space */
+@supports (min-height: 100dvh) {
+  .gate-overlay {
+    min-height: 100dvh;
+  }
+}
+
+.gate-overlay::before {
+  content: '';
+  flex-shrink: 0;
+  margin: auto;
 }
 
 .gate-overlay.fade-out {
@@ -621,13 +636,15 @@ textarea.form-control {
 .gate-card {
   width: 100%;
   max-width: 440px;
-  padding: 32px 28px;
+  margin: auto;
+  padding: 36px 28px 28px;
   border-radius: var(--r-xl);
-  background: rgba(13, 18, 37, 0.75);
-  border: 1px solid rgba(245, 200, 66, 0.25);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 200, 66, 0.1);
-  backdrop-filter: blur(20px);
+  background: rgba(13, 18, 37, 0.80);
+  border: 1px solid rgba(245, 200, 66, 0.28);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 40px rgba(245, 200, 66, 0.12);
+  backdrop-filter: blur(24px);
   animation: gateCardSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  flex-shrink: 0;
 }
 
 @keyframes gateCardSlideUp {
@@ -644,6 +661,9 @@ textarea.form-control {
 .gate-header {
   text-align: center;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .gate-title {

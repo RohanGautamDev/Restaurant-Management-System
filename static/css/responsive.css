@@ -332,12 +332,17 @@ html, body, .app-container, .main-wrapper {
     grid-template-columns: 1fr;
   }
 
-  /* Full-Screen Landing Gate Mobile Optimization */
+  /* ─── Landing Gate Mobile ─── */
+  .gate-overlay {
+    padding: 16px 12px;
+    align-items: flex-start;
+  }
+
   .gate-card {
-    padding: 20px 14px;
-    max-width: 98vw;
-    max-height: 96vh;
-    overflow-y: auto;
+    padding: 24px 16px 20px;
+    max-width: 100%;
+    margin: auto 0;
+    /* No max-height — overlay itself scrolls */
   }
 
   .gate-title {
@@ -351,13 +356,14 @@ html, body, .app-container, .main-wrapper {
   .demo-chips-grid,
   .gate-demo-chips {
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
   }
 
   .demo-chip {
     width: 100%;
     text-align: center;
-    padding: 8px 12px;
+    padding: 10px 14px;
+    font-size: 0.83rem;
   }
 }
 
@@ -386,3 +392,4 @@ html, body, .app-container, .main-wrapper {
     transition-duration: 0.01ms !important;
   }
 }
+
