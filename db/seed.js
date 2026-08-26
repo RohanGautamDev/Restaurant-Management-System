@@ -5,11 +5,19 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const { db, syncMenuAvailability } = require('./database');
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return { salt, hash };
+}
 
 function seedDatabase() {
   console.log('[SEED] Clearing existing records...');
   db.exec(`
+    DELETE FROM users;
     DELETE FROM food_waste_logs;
     DELETE FROM order_items;
     DELETE FROM orders;
@@ -308,6 +316,21 @@ function seedDatabase() {
   for (const w of wasteData) {
     if (w[0]) insertWaste.run(...w);
   }
+
+  console.log('[SEED] Inserting Default User Accounts (admin & staff)...');
+  const insertUser = db.prepare(`
+    INSERT INTO users (username, email, password_hash, salt, full_name, role)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  const adminCreds = hashPassword('password123');
+  insertUser.run('admin', 'admin@dinemind.ai', adminCreds.hash, adminCreds.salt, 'Rohan Gautam', 'admin');
+
+  const staffCreds = hashPassword('password123');
+  insertUser.run('staff', 'staff@dinemind.ai', staffCreds.hash, staffCreds.salt, 'Kitchen Operations', 'staff');
+
+  const managerCreds = hashPassword('password123');
+  insertUser.run('manager', 'manager@dinemind.ai', managerCreds.hash, managerCreds.salt, 'Floor Manager', 'manager');
 
   // Initial menu availability sync
   syncMenuAvailability();

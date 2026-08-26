@@ -98,21 +98,39 @@ const UI = {
 
   // ─── 4. Mobile Drawer Toggler ───
   initSidebar() {
-    const toggleBtn = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('main-sidebar');
-    if (!toggleBtn || !sidebar) return;
-
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('drawer-open');
-    });
+    if (!sidebar) return;
 
     // Close on navigation item click (on mobile)
     sidebar.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
         if (window.innerWidth <= 860) {
-          sidebar.classList.remove('drawer-open');
+          this.closeSidebar();
         }
       });
     });
+  },
+
+  toggleSidebar() {
+    const sidebar = document.getElementById('main-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar) return;
+
+    const isOpen = sidebar.classList.contains('drawer-open');
+    if (isOpen) {
+      this.closeSidebar();
+    } else {
+      sidebar.classList.add('drawer-open');
+      if (backdrop) backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  },
+
+  closeSidebar() {
+    const sidebar = document.getElementById('main-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar) sidebar.classList.remove('drawer-open');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.style.overflow = '';
   }
 };

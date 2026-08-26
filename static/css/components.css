@@ -423,3 +423,286 @@ textarea.form-control {
 .toast-item.toast-error   { border-color: rgba(255, 92, 138, 0.4); }
 .toast-item.toast-warning { border-color: rgba(245, 200, 66, 0.4); }
 .toast-item.toast-info    { border-color: rgba(79, 142, 255, 0.4); }
+
+/* ─── 8. Auth Controls & User Profile Badge ─── */
+.auth-controls-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.user-profile-pill:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.user-avatar-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-accent), #ff9233);
+  color: #0b0f19;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(245, 200, 66, 0.3);
+}
+
+.user-info-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.user-role-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gold-accent);
+}
+
+.btn-signout {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: var(--r-full);
+  background: rgba(255, 92, 138, 0.15);
+  border: 1px solid rgba(255, 92, 138, 0.3);
+  color: #ff5c8a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-signout:hover {
+  background: rgba(255, 92, 138, 0.3);
+  color: #ffffff;
+}
+
+/* ─── 9. Auth Modal Extensions ─── */
+.auth-modal-dialog {
+  max-width: 440px;
+  width: 90%;
+}
+
+.auth-header-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 20px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.auth-tab-btn.active {
+  color: var(--gold-accent);
+}
+
+.auth-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-accent);
+  box-shadow: 0 0 10px var(--gold-accent);
+}
+
+.demo-login-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(245, 200, 66, 0.3);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.demo-login-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gold-accent);
+  margin-bottom: 8px;
+}
+
+.demo-chips-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.demo-chip {
+  padding: 5px 10px;
+  border-radius: var(--r-full);
+  background: rgba(245, 200, 66, 0.1);
+  border: 1px solid rgba(245, 200, 66, 0.25);
+  color: #ffdf7a;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-chip:hover {
+  background: rgba(245, 200, 66, 0.25);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.password-input-wrap {
+  position: relative;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.password-toggle-icon:hover {
+  opacity: 1;
+}
+
+/* ─── 10. Full-Screen Motion UI Login Landing Gate ─── */
+.gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(circle at center, rgba(13, 18, 38, 0.88) 0%, rgba(6, 9, 20, 0.96) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gate-overlay.fade-out {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.gate-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px 28px;
+  border-radius: var(--r-xl);
+  background: rgba(13, 18, 37, 0.75);
+  border: 1px solid rgba(245, 200, 66, 0.25);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 200, 66, 0.1);
+  backdrop-filter: blur(20px);
+  animation: gateCardSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes gateCardSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.gate-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.gate-title {
+  font-size: 26px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, var(--gold-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.gate-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.gate-demo-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(245, 200, 66, 0.3);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.gate-demo-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gold-accent);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.gate-demo-chips {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.gate-form-group {
+  margin-bottom: 16px;
+}
+
+.gate-form-group .form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gold-accent);
+  margin-bottom: 6px;
+}
+
+.gate-footer {
+  border-top: 1px solid var(--glass-border);
+  padding-top: 16px;
+}
+
+

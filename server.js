@@ -35,6 +35,7 @@ app.get('/api/health', (req, res) => {
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 // Mount API Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));

@@ -136,6 +136,33 @@ function initSchema() {
       logged_at TEXT DEFAULT (datetime('now')),
       notes TEXT DEFAULT ''
     );
+
+    -- 9. Users (Authentication)
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      salt TEXT NOT NULL,
+      full_name TEXT DEFAULT '',
+      role TEXT NOT NULL DEFAULT 'manager',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- 10. Restaurant Profiles (per-owner)
+    CREATE TABLE IF NOT EXISTS restaurant_profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      restaurant_name TEXT NOT NULL DEFAULT 'My Restaurant',
+      address TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      logo_emoji TEXT DEFAULT '🍽️',
+      currency TEXT DEFAULT 'USD',
+      tagline TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 }
 

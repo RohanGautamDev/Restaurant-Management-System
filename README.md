@@ -3,6 +3,8 @@
 > **Smart Restaurant Operations, Simplified.**
 > A production-quality, full-stack Restaurant Management System powered by **Node.js, Express, SQLite, and Vanilla JavaScript**.
 
+🌐 **Live Demo (Vercel):** [https://restaurant-management-system-snfl.vercel.app/](https://restaurant-management-system-snfl.vercel.app/)
+
 ---
 
 ## 🌟 Features Overview

@@ -40,9 +40,126 @@
 
 
   <!-- ═══════════════════════════════════════════════
+       FULL-SCREEN MOTION UI LOGIN LANDING GATE
+       ════════════════════════════════════════════════ -->
+  <div id="login-landing-screen" class="gate-overlay">
+    <div class="gate-card card-tilt">
+      <!-- Chromatic Pinwheel Header -->
+      <div class="gate-header">
+        <div class="edge-pinwheel-wrap" style="width:56px;height:56px;margin:0 auto 14px;">
+          <div class="edge-pinwheel-glow" style="inset:-8px;opacity:0.85;"></div>
+          <svg class="edge-pinwheel-svg" viewBox="0 0 100 100">
+            <path d="M50,50 L50,6 A44,44 0 0,1 88.1,28 C70,35 55,45 50,50 Z" fill="#ff4d6d"/>
+            <path d="M50,50 L88.1,28 A44,44 0 0,1 88.1,72 C75,55 60,50 50,50 Z" fill="#ff9233"/>
+            <path d="M50,50 L88.1,72 A44,44 0 0,1 50,94 C50,75 50,58 50,50 Z" fill="#ffe135"/>
+            <path d="M50,50 L50,94 A44,44 0 0,1 11.9,72 C30,65 45,55 50,50 Z" fill="#38ef7d"/>
+            <path d="M50,50 L11.9,72 A44,44 0 0,1 11.9,28 C25,45 40,50 50,50 Z" fill="#00d2ff"/>
+            <path d="M50,50 L11.9,28 A44,44 0 0,1 50,6 C50,25 50,42 50,50 Z" fill="#8054ff"/>
+          </svg>
+        </div>
+        <h1 class="gate-title">DineMind AI</h1>
+        <p class="gate-subtitle">Smart Restaurant Operations Platform</p>
+      </div>
+
+      <!-- 1-Click Demo Quick Selectors -->
+      <div class="gate-demo-box">
+        <div class="gate-demo-label">⚡ 1-Click Quick Demo Login</div>
+        <div class="gate-demo-chips">
+          <button type="button" class="demo-chip" onclick="App.fillGateDemo('admin')">👑 Admin (admin)</button>
+          <button type="button" class="demo-chip" onclick="App.fillGateDemo('manager')">📊 Manager (manager)</button>
+          <button type="button" class="demo-chip" onclick="App.fillGateDemo('staff')">👨‍🍳 Staff (staff)</button>
+        </div>
+      </div>
+
+      <!-- Sign In Form (Default Gate View) -->
+      <form id="gate-signin-form" onsubmit="App.handleGateSignIn(event)">
+        <div class="gate-form-group">
+          <label class="form-label">1st :- Username or Email *</label>
+          <input type="text" id="gate-username" class="form-control" placeholder="e.g. admin or manager@dinemind.ai" required autocomplete="username">
+        </div>
+
+        <div class="gate-form-group">
+          <label class="form-label">2nd :- Password *</label>
+          <div class="password-input-wrap">
+            <input type="password" id="gate-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-password', this)">👁️</span>
+          </div>
+        </div>
+
+        <div class="gate-actions-row mt-16">
+          <button type="submit" class="btn btn-gold w-full" id="btn-gate-signin">
+            <span>🔑</span>
+            <span>Sign In to Operations Console</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Sign Up Form (Hidden Gate View) -->
+      <form id="gate-signup-form" onsubmit="App.handleGateSignUp(event)" style="display:none;">
+        <div class="gate-form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="gate-signup-fullname" class="form-control" placeholder="e.g. Rohan Gautam" required>
+        </div>
+
+        <div class="form-row">
+          <div class="gate-form-group">
+            <label class="form-label">1st :- Username *</label>
+            <input type="text" id="gate-signup-username" class="form-control" placeholder="username" required autocomplete="username">
+          </div>
+          <div class="gate-form-group">
+            <label class="form-label">Role *</label>
+            <select id="gate-signup-role" class="form-control" required>
+              <option value="manager">📊 Manager</option>
+              <option value="staff">👨‍🍳 Staff</option>
+              <option value="admin">👑 Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="gate-form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="gate-signup-email" class="form-control" placeholder="user@dinemind.ai" required autocomplete="email">
+        </div>
+
+        <div class="gate-form-group">
+          <label class="form-label">2nd :- Password *</label>
+          <div class="password-input-wrap">
+            <input type="password" id="gate-signup-password" class="form-control" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+            <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-signup-password', this)">👁️</span>
+          </div>
+        </div>
+
+        <div class="gate-actions-row mt-16">
+          <button type="submit" class="btn btn-gold w-full" id="btn-gate-signup">
+            <span>✨</span>
+            <span>Create Account & Enter</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Gate Footer Controls & Visitor Entry -->
+      <div class="gate-footer mt-16">
+        <button type="button" class="btn btn-glass w-full" onclick="App.enterAsVisitor()">
+          <span>👀</span>
+          <span>Explore as Guest / Visitor Demo</span>
+        </button>
+
+        <div class="gate-toggle-link text-center mt-12">
+          <span id="gate-toggle-text" class="text-3 text-xs">Don't have an account? <a href="#" onclick="App.toggleGateView(); return false;" class="text-gold font-bold">Sign Up</a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ═══════════════════════════════════════════════
        APP SHELL: SIDEBAR + TOPBAR + CONTENT
        ════════════════════════════════════════════════ -->
-  <div class="app-container">
+  <div class="app-container" id="app-container" style="display:none;">
+
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="UI.closeSidebar()"></div>
 
     <!-- ─── 1. FIXED GLASS SIDEBAR ─── -->
     <aside class="sidebar" id="main-sidebar">
@@ -112,12 +229,12 @@
       </nav>
 
       <div class="sidebar-footer">
-        <a href="/admin/" target="_blank" class="admin-portal-link">
-          <span>⚙️</span>
-          <span>Django Admin</span>
-        </a>
+        <button class="sidebar-footer-btn" onclick="App.openRestaurantSetupModal()" title="Restaurant Settings">
+          <span>🏪</span>
+          <span id="sidebar-restaurant-label">My Restaurant</span>
+        </button>
         <div class="text-3 text-xs text-center" style="margin-top:6px;">
-          CodeAlpha Internship Project
+          DineMind AI Operations
         </div>
       </div>
     </aside>
@@ -128,9 +245,13 @@
       <!-- Top Navbar -->
       <header class="topbar">
         <div class="topbar-left">
+          <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="UI.toggleSidebar()" aria-label="Toggle Mobile Menu">
+            <span>☰</span>
+          </button>
+
           <div class="breadcrumbs">
-            <span>DineMind AI</span>
-            <span>/</span>
+            <span id="topbar-restaurant-name" class="topbar-restaurant-brand">DineMind AI</span>
+            <span class="breadcrumbs-sep">/</span>
             <span class="breadcrumbs-current" id="topbar-current-page">Dashboard</span>
           </div>
         </div>
@@ -147,6 +268,18 @@
             <span>⚡</span>
             <span>New Order</span>
           </button>
+
+          <!-- User Authentication Widget -->
+          <div class="auth-controls-wrap" id="topbar-auth-container">
+            <button class="btn btn-glass btn-sm" onclick="App.openSignInModal()">
+              <span>🔑</span>
+              <span>Sign In</span>
+            </button>
+            <button class="btn btn-gold btn-sm" onclick="App.openSignUpModal()">
+              <span>✨</span>
+              <span>Sign Up</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -915,8 +1048,190 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════
+       AUTHENTICATION MODALS (Sign In & Sign Up)
+       ════════════════════════════════════════════════ -->
+
+  <!-- 1. SIGN IN MODAL -->
+  <div class="modal-backdrop" id="modal-signin">
+    <div class="modal-dialog auth-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">🔐</span>
+          <div>
+            <h3 class="modal-title">Sign In to DineMind AI</h3>
+            <p class="modal-subtitle">Access your restaurant management console</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="UI.closeModal('modal-signin')">&times;</button>
+      </div>
+
+      <div class="auth-header-tabs">
+        <button class="auth-tab-btn active">Sign In</button>
+        <button class="auth-tab-btn" onclick="App.openSignUpModal()">Create Account</button>
+      </div>
+
+      <!-- Quick Demo Login Presets -->
+      <div class="demo-login-box">
+        <div class="demo-login-title">⚡ 1-Click Demo Login</div>
+        <div class="demo-chips-grid">
+          <button type="button" class="demo-chip" onclick="App.fillDemoLogin('admin')">👑 Admin (admin)</button>
+          <button type="button" class="demo-chip" onclick="App.fillDemoLogin('manager')">📊 Manager (manager)</button>
+          <button type="button" class="demo-chip" onclick="App.fillDemoLogin('staff')">👨‍🍳 Kitchen Staff (staff)</button>
+        </div>
+      </div>
+
+      <form id="form-signin" onsubmit="App.handleSignIn(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Username or Email *</label>
+            <input type="text" id="signin-username" class="form-control" placeholder="e.g. admin or manager@dinemind.ai" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="signin-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+              <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('signin-password', this)">👁️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-signin')">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="btn-submit-signin">🔑 Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. SIGN UP MODAL -->
+  <div class="modal-backdrop" id="modal-signup">
+    <div class="modal-dialog auth-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">✨</span>
+          <div>
+            <h3 class="modal-title">Create an Account</h3>
+            <p class="modal-subtitle">Join DineMind AI Restaurant Operations</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="UI.closeModal('modal-signup')">&times;</button>
+      </div>
+
+      <div class="auth-header-tabs">
+        <button class="auth-tab-btn" onclick="App.openSignInModal()">Sign In</button>
+        <button class="auth-tab-btn active">Create Account</button>
+      </div>
+
+      <form id="form-signup" onsubmit="App.handleSignUp(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="signup-fullname" class="form-control" placeholder="e.g. Alex Rivera" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Username *</label>
+              <input type="text" id="signup-username" class="form-control" placeholder="e.g. arivera" required autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role *</label>
+              <select id="signup-role" class="form-control" required>
+                <option value="manager">📊 Manager</option>
+                <option value="staff">👨‍🍳 Staff</option>
+                <option value="admin">👑 Administrator</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="signup-email" class="form-control" placeholder="alex@restaurant.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password (min 6 chars) *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="signup-password" class="form-control" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+              <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('signup-password', this)">👁️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-signup')">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="btn-submit-signup">✨ Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Stack Mount -->
   <div id="toast-stack" class="toast-stack"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       RESTAURANT SETUP MODAL
+       ════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-restaurant-setup" style="display:none;">
+    <div class="modal-box" style="max-width:540px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">🏪 Your Restaurant Profile</h3>
+          <p class="modal-subtitle">Personalize this dashboard with your restaurant's details</p>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('modal-restaurant-setup')">✕</button>
+      </div>
+      <form id="form-restaurant-setup" onsubmit="App.handleRestaurantSetupSave(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">🍽️ Restaurant Name *</label>
+            <input type="text" id="rs-name" class="form-control" placeholder="e.g. Spice Garden, The Golden Fork..." required maxlength="80">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">📞 Phone Number</label>
+              <input type="tel" id="rs-phone" class="form-control" placeholder="+91 98765 43210">
+            </div>
+            <div class="form-group">
+              <label class="form-label">💰 Currency</label>
+              <select id="rs-currency" class="form-control">
+                <option value="INR">₹ INR (India)</option>
+                <option value="USD" selected>$ USD</option>
+                <option value="EUR">€ EUR</option>
+                <option value="GBP">£ GBP</option>
+                <option value="AED">AED (UAE)</option>
+                <option value="SGD">SGD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">📍 Restaurant Address</label>
+            <input type="text" id="rs-address" class="form-control" placeholder="e.g. 12, MG Road, Bengaluru, Karnataka 560001">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">✨ Short Tagline</label>
+            <input type="text" id="rs-tagline" class="form-control" placeholder="e.g. Farm to Table · Fine Dining" maxlength="60">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">🎨 Logo Emoji (1 character)</label>
+            <input type="text" id="rs-logo-emoji" class="form-control" placeholder="🍽️" maxlength="4" style="font-size:1.5rem;text-align:center;">
+            <p class="form-hint">Pick any emoji to represent your restaurant icon (e.g. 🍕 🍣 🥩 🌮 ☕)</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" onclick="UI.closeModal('modal-restaurant-setup')">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="btn-save-restaurant">💾 Save Restaurant Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════════
        JAVASCRIPT MODULES

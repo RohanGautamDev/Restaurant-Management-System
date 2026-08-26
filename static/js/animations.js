@@ -40,13 +40,27 @@ const Motion = {
   initFluidCanvas() {
     this.canvas = document.getElementById('kinetic-canvas');
     if (!this.canvas) return;
+
+    // Disable heavy canvas particle animation loop on mobile devices for smooth 60fps performance
+    if (window.innerWidth <= 768 || 'ontouchstart' in window) {
+      this.canvas.style.display = 'none';
+      return;
+    }
+
     this.ctx = this.canvas.getContext('2d');
-
     this.resizeCanvas();
-    window.addEventListener('resize', () => this.resizeCanvas());
+    window.addEventListener('resize', () => {
+      this.resizeCanvas();
+      if (window.innerWidth <= 768) {
+        if (this.animId) cancelAnimationFrame(this.animId);
+        this.canvas.style.display = 'none';
+      } else {
+        this.canvas.style.display = 'block';
+      }
+    });
 
-    // Generate fluid kinetic nodes
-    const count = window.innerWidth < 768 ? 20 : 45;
+    // Generate fluid kinetic nodes (desktop only)
+    const count = 35;
     this.particles = [];
     for (let i = 0; i < count; i++) {
       this.particles.push({
@@ -71,7 +85,7 @@ const Motion = {
   },
 
   renderCanvas() {
-    if (!this.ctx || !this.canvas) return;
+    if (!this.ctx || !this.canvas || window.innerWidth <= 768) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const mouseX = this.mouse.targetX;
@@ -150,21 +164,18 @@ const Motion = {
   },
 
   // ─── 3. Card 3D Perspective Tilt & Dynamic Spotlight Shader ───
-  initCard3DTilt() {
-    // Disabled to prevent 3D box twisting/zigzagging when moving cursor
-  },
+  initCard3DTilt() {},
 
   // ─── 4. Magnetic Button Micro-Physics ───
-  initMagneticButtons() {
-    // Disabled to keep buttons steady and easy to click
-  },
+  initMagneticButtons() {},
 
   // ─── 5. Parallax Floating Orbs ───
   initParallaxOrbs() {
     const orbs = document.querySelectorAll('.orb');
-    if (!orbs.length) return;
+    if (!orbs.length || window.innerWidth <= 768) return;
 
     window.addEventListener('mousemove', (e) => {
+      if (window.innerWidth <= 768) return;
       const offsetX = (e.clientX / window.innerWidth - 0.5) * 40;
       const offsetY = (e.clientY / window.innerHeight - 0.5) * 40;
 
@@ -178,6 +189,7 @@ const Motion = {
   // ─── 6. Click Ripple Waves ───
   initClickRipples() {
     window.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) return;
       this.ripples.push({
         x: e.clientX,
         y: e.clientY,
@@ -194,13 +206,11 @@ const Motion = {
     const numTarget = Number(targetValue) || 0;
     const isFloat = String(targetValue).includes('.');
     
-    // Read previous numeric value to transition smoothly without zero-reset flickering
     const currentText = element.textContent ? element.textContent.replace(/[^0-9.-]/g, '') : '';
     const prevVal = element.dataset.value !== undefined ? Number(element.dataset.value) : (currentText ? parseFloat(currentText) || 0 : 0);
     
     element.dataset.value = numTarget;
 
-    // Do nothing if value hasn't changed
     if (prevVal === numTarget && element.dataset.initialized === 'true') {
       element.textContent = prefix + (isFloat ? numTarget.toFixed(2) : numTarget) + suffix;
       return;
@@ -233,18 +243,23 @@ const Motion = {
     const pinwheels = document.querySelectorAll('.edge-pinwheel-svg');
     if (!pinwheels.length) return;
 
-    let baseDuration = 5.0; // normal 5s per rev
+    if (window.innerWidth <= 768 || 'ontouchstart' in window) {
+      // On mobile, rely on pure CSS hardware-accelerated keyframe animation to avoid JS DOM frame thrashes
+      return;
+    }
+
+    let baseDuration = 5.0;
     let currentDuration = 5.0;
     let targetDuration = 5.0;
 
     window.addEventListener('mousemove', () => {
+      if (window.innerWidth <= 768) return;
       const speed = Math.hypot(this.mouseVelocity.x, this.mouseVelocity.y);
-      // High velocity spins the pinwheel faster (down to 0.7s)
       targetDuration = Math.max(0.7, baseDuration - Math.min(speed * 0.15, 4.3));
     });
 
     const updatePinwheels = () => {
-      // Smooth lerp back to 5.0s
+      if (window.innerWidth <= 768) return;
       currentDuration += (targetDuration - currentDuration) * 0.08;
       targetDuration += (baseDuration - targetDuration) * 0.03;
 
@@ -256,20 +271,10 @@ const Motion = {
     };
     updatePinwheels();
 
-    // Click on pinwheel bursts chromatic wave
     pinwheels.forEach(svg => {
       svg.addEventListener('click', (e) => {
         e.stopPropagation();
-        for (let i = 0; i < 4; i++) {
-          this.ripples.push({
-            x: e.clientX,
-            y: e.clientY,
-            radius: 8 * i,
-            growth: 6 + i * 2,
-            opacity: 0.8,
-          });
-        }
-        targetDuration = 0.4; // super spin burst!
+        targetDuration = 0.4;
       });
     });
   }

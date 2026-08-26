@@ -10,6 +10,7 @@ const App = {
   menuItemsCache: [],
   tablesCache: [],
   activeOrderCart: [],
+  restaurantProfile: null,
 
   init() {
     Motion.init();
@@ -17,6 +18,7 @@ const App = {
     UI.initClock();
     UI.initSidebar();
 
+    this.initAuth();
     this.bindNavigation();
     this.navigate('dashboard');
     this.startLiveSync();
@@ -969,6 +971,501 @@ const App = {
       }
     } catch (err) {
       UI.showToast('Could not load reports.', 'error');
+    }
+  },
+
+  // ═════════════════════════════════════════════════════
+  // 8. USER AUTHENTICATION & LANDING GATE CONTROLLER
+  // ═════════════════════════════════════════════════════
+  authState: {
+    currentUser: null,
+    token: null,
+    isLoggedIn: false,
+    isVisitor: false
+  },
+
+  async initAuth() {
+    const savedUser = localStorage.getItem('dinemind_user');
+    const savedToken = localStorage.getItem('dinemind_token');
+    const visitorSession = sessionStorage.getItem('dinemind_visitor');
+
+    if (visitorSession === 'true') {
+      this.authState.isVisitor = true;
+    }
+
+    if (savedUser && savedToken) {
+      try {
+        this.authState.currentUser = JSON.parse(savedUser);
+        this.authState.token = savedToken;
+        this.authState.isLoggedIn = true;
+
+        // Verify session in background
+        const res = await API.auth.getMe();
+        if (res.success && res.user) {
+          this.authState.currentUser = res.user;
+          localStorage.setItem('dinemind_user', JSON.stringify(res.user));
+        }
+      } catch (e) {
+        console.warn('Session verification failed, resetting token.');
+        this.handleSignOut(true);
+        return;
+      }
+    }
+
+    this.renderAuthUI();
+
+    if (this.authState.isLoggedIn || this.authState.isVisitor) {
+      this.unlockDashboard(true);
+      if (this.authState.isLoggedIn) {
+        this.initRestaurantProfile();
+      }
+    } else {
+      this.lockDashboard();
+    }
+  },
+
+  // ─── Restaurant Profile ───
+  async initRestaurantProfile() {
+    try {
+      const res = await API.auth.getRestaurantProfile();
+      if (res.success && res.profile) {
+        this.restaurantProfile = res.profile;
+        this.applyRestaurantBranding(res.profile);
+      }
+    } catch (e) {
+      // Profile may not exist yet for new users, silently skip
+    }
+  },
+
+  applyRestaurantBranding(profile) {
+    if (!profile) return;
+    const name = profile.restaurant_name || 'DineMind AI';
+    const emoji = profile.logo_emoji || '🍽️';
+
+    // Update topbar brand name
+    const topbarName = document.getElementById('topbar-restaurant-name');
+    if (topbarName) topbarName.textContent = name;
+
+    // Update sidebar restaurant label
+    const sidebarLabel = document.getElementById('sidebar-restaurant-label');
+    if (sidebarLabel) sidebarLabel.textContent = name;
+
+    // Update sidebar logo title
+    const logoTitle = document.querySelector('.sidebar-logo-title');
+    if (logoTitle) logoTitle.textContent = name.length > 14 ? name.slice(0, 14) + '…' : name;
+
+    // Update sidebar logo tag
+    const logoTag = document.querySelector('.sidebar-logo-tag');
+    if (logoTag && profile.tagline) logoTag.textContent = profile.tagline;
+
+    // Update page title
+    document.title = `${name} — DineMind AI Operations`;
+
+    // Store profile for later use (e.g., currency)
+    this.restaurantProfile = profile;
+  },
+
+  openRestaurantSetupModal() {
+    if (!this.authState.isLoggedIn) {
+      UI.showToast('Please sign in to manage your restaurant profile.', 'warning');
+      return;
+    }
+    // Pre-fill fields from existing profile
+    const p = this.restaurantProfile;
+    const setValue = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setValue('rs-name', p ? p.restaurant_name : '');
+    setValue('rs-address', p ? p.address : '');
+    setValue('rs-phone', p ? p.phone : '');
+    setValue('rs-logo-emoji', p ? p.logo_emoji : '🍽️');
+    setValue('rs-tagline', p ? p.tagline : '');
+    const currencyEl = document.getElementById('rs-currency');
+    if (currencyEl && p && p.currency) currencyEl.value = p.currency;
+    UI.openModal('modal-restaurant-setup');
+  },
+
+  async handleRestaurantSetupSave(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-restaurant');
+    const data = {
+      restaurant_name: (document.getElementById('rs-name') || {}).value || '',
+      address: (document.getElementById('rs-address') || {}).value || '',
+      phone: (document.getElementById('rs-phone') || {}).value || '',
+      logo_emoji: (document.getElementById('rs-logo-emoji') || {}).value || '🍽️',
+      currency: (document.getElementById('rs-currency') || {}).value || 'USD',
+      tagline: (document.getElementById('rs-tagline') || {}).value || '',
+    };
+
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+      const res = await API.auth.saveRestaurantProfile(data);
+      if (res.success && res.profile) {
+        this.restaurantProfile = res.profile;
+        this.applyRestaurantBranding(res.profile);
+        UI.closeModal('modal-restaurant-setup');
+        UI.showToast(`✅ Restaurant profile saved! Welcome, ${res.profile.restaurant_name}!`, 'success');
+      }
+    } catch (err) {
+      UI.showToast(err.message || 'Failed to save restaurant profile.', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '💾 Save Restaurant Profile'; }
+    }
+  },
+
+  unlockDashboard(immediate = false) {
+    const gate = document.getElementById('login-landing-screen');
+    const appShell = document.getElementById('app-container');
+
+    if (appShell) appShell.style.display = 'flex';
+
+    if (gate) {
+      if (immediate) {
+        gate.style.display = 'none';
+      } else {
+        gate.classList.add('fade-out');
+        setTimeout(() => {
+          gate.style.display = 'none';
+          gate.classList.remove('fade-out');
+        }, 500);
+      }
+    }
+  },
+
+  lockDashboard() {
+    const gate = document.getElementById('login-landing-screen');
+    const appShell = document.getElementById('app-container');
+
+    if (appShell) appShell.style.display = 'none';
+    if (gate) {
+      gate.style.display = 'flex';
+      gate.classList.remove('fade-out');
+    }
+  },
+
+  enterAsVisitor() {
+    this.authState.isVisitor = true;
+    sessionStorage.setItem('dinemind_visitor', 'true');
+    this.renderAuthUI();
+    this.unlockDashboard(false);
+    UI.showToast('Welcome! Exploring DineMind AI as Guest Visitor.', 'info');
+  },
+
+  fillGateDemo(username) {
+    const userInput = document.getElementById('gate-username');
+    const passInput = document.getElementById('gate-password');
+
+    if (userInput) userInput.value = username;
+    if (passInput) passInput.value = 'password123';
+
+    UI.showToast(`Pre-filled credentials for "${username}"!`, 'info');
+  },
+
+  toggleGateView() {
+    const signinForm = document.getElementById('gate-signin-form');
+    const signupForm = document.getElementById('gate-signup-form');
+    const toggleText = document.getElementById('gate-toggle-text');
+
+    if (signinForm && signupForm) {
+      if (signinForm.style.display === 'none') {
+        signinForm.style.display = 'block';
+        signupForm.style.display = 'none';
+        if (toggleText) toggleText.innerHTML = `Don't have an account? <a href="#" onclick="App.toggleGateView(); return false;" class="text-gold font-bold">Sign Up</a>`;
+      } else {
+        signinForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        if (toggleText) toggleText.innerHTML = `Already have an account? <a href="#" onclick="App.toggleGateView(); return false;" class="text-gold font-bold">Sign In</a>`;
+      }
+    }
+  },
+
+  async handleGateSignIn(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-gate-signin');
+    const usernameInput = document.getElementById('gate-username');
+    const passwordInput = document.getElementById('gate-password');
+
+    if (!usernameInput || !passwordInput) return;
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Authenticating...';
+      }
+
+      const res = await API.auth.login({ username, password });
+
+      if (res.success && res.token && res.user) {
+        this.authState.currentUser = res.user;
+        this.authState.token = res.token;
+        this.authState.isLoggedIn = true;
+        this.authState.isVisitor = false;
+
+        localStorage.setItem('dinemind_user', JSON.stringify(res.user));
+        localStorage.setItem('dinemind_token', res.token);
+        sessionStorage.removeItem('dinemind_visitor');
+
+        this.renderAuthUI();
+        this.unlockDashboard(false);
+        this.initRestaurantProfile();
+        UI.showToast(res.message || `Welcome back, ${res.user.full_name}!`, 'success');
+      }
+
+    } catch (err) {
+      UI.showToast(err.message || 'Invalid username or password.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>🔑</span><span>Sign In to Operations Console</span>`;
+      }
+    }
+  },
+
+  async handleGateSignUp(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-gate-signup');
+    const fullNameInput = document.getElementById('gate-signup-fullname');
+    const usernameInput = document.getElementById('gate-signup-username');
+    const emailInput = document.getElementById('gate-signup-email');
+    const roleInput = document.getElementById('gate-signup-role');
+    const passwordInput = document.getElementById('gate-signup-password');
+
+    if (!usernameInput || !emailInput || !passwordInput) return;
+
+    const full_name = fullNameInput ? fullNameInput.value.trim() : '';
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const role = roleInput ? roleInput.value : 'manager';
+    const password = passwordInput.value;
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Creating Account...';
+      }
+
+      const res = await API.auth.signup({ full_name, username, email, role, password });
+
+      if (res.success && res.token && res.user) {
+        this.authState.currentUser = res.user;
+        this.authState.token = res.token;
+        this.authState.isLoggedIn = true;
+        this.authState.isVisitor = false;
+
+        localStorage.setItem('dinemind_user', JSON.stringify(res.user));
+        localStorage.setItem('dinemind_token', res.token);
+        sessionStorage.removeItem('dinemind_visitor');
+
+        this.renderAuthUI();
+        this.unlockDashboard(false);
+        UI.showToast(`Account created successfully! Welcome, ${res.user.full_name}.`, 'success');
+
+        // Prompt restaurant setup for new account owners
+        setTimeout(() => {
+          this.openRestaurantSetupModal();
+        }, 800);
+      }
+    } catch (err) {
+      UI.showToast(err.message || 'Failed to create account.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>✨</span><span>Create Account & Enter</span>`;
+      }
+    }
+  },
+
+  renderAuthUI() {
+    const container = document.getElementById('topbar-auth-container');
+    if (!container) return;
+
+    if (this.authState.isLoggedIn && this.authState.currentUser) {
+      const user = this.authState.currentUser;
+      const initial = (user.full_name || user.username || 'U').charAt(0).toUpperCase();
+
+      container.innerHTML = `
+        <div class="user-profile-pill">
+          <div class="user-avatar-icon">${initial}</div>
+          <div class="user-info-text">
+            <span class="user-name-title">${user.full_name || user.username}</span>
+            <span class="user-role-tag">${user.role}</span>
+          </div>
+          <button class="btn-signout ml-4" onclick="App.handleSignOut()" title="Sign Out">Sign Out</button>
+        </div>
+      `;
+    } else if (this.authState.isVisitor) {
+      container.innerHTML = `
+        <div class="user-profile-pill">
+          <div class="user-avatar-icon" style="background:linear-gradient(135deg, #00d2ff, #8054ff);">👀</div>
+          <div class="user-info-text">
+            <span class="user-name-title">Guest Visitor</span>
+            <span class="user-role-tag" style="color:#00d2ff;">Demo Mode</span>
+          </div>
+          <button class="btn btn-gold btn-xs ml-4" onclick="App.lockDashboard()">Sign In</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <button class="btn btn-glass btn-sm" onclick="App.openSignInModal()">
+          <span>🔑</span>
+          <span>Sign In</span>
+        </button>
+        <button class="btn btn-gold btn-sm" onclick="App.openSignUpModal()">
+          <span>✨</span>
+          <span>Sign Up</span>
+        </button>
+      `;
+    }
+  },
+
+  openSignInModal() {
+    UI.closeModal('modal-signup');
+    UI.openModal('modal-signin');
+  },
+
+  openSignUpModal() {
+    UI.closeModal('modal-signin');
+    UI.openModal('modal-signup');
+  },
+
+  fillDemoLogin(username) {
+    const usernameInput = document.getElementById('signin-username');
+    const passwordInput = document.getElementById('signin-password');
+
+    if (usernameInput) usernameInput.value = username;
+    if (passwordInput) passwordInput.value = 'password123';
+
+    UI.showToast(`Pre-filled demo credentials for "${username}"!`, 'info');
+  },
+
+  togglePasswordVisibility(inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      iconEl.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      iconEl.textContent = '👁️';
+    }
+  },
+
+  async handleSignIn(e) {
+    e.preventDefault();
+    const btnSubmit = document.getElementById('btn-submit-signin');
+    const usernameInput = document.getElementById('signin-username');
+    const passwordInput = document.getElementById('signin-password');
+
+    if (!usernameInput || !passwordInput) return;
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    try {
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Authenticating...';
+      }
+
+      const res = await API.auth.login({ username, password });
+
+      if (res.success && res.token && res.user) {
+        this.authState.currentUser = res.user;
+        this.authState.token = res.token;
+        this.authState.isLoggedIn = true;
+
+        localStorage.setItem('dinemind_user', JSON.stringify(res.user));
+        localStorage.setItem('dinemind_token', res.token);
+
+        this.renderAuthUI();
+        UI.closeModal('modal-signin');
+        UI.showToast(res.message || `Welcome back, ${res.user.full_name}!`, 'success');
+
+        // Clear password
+        passwordInput.value = '';
+      }
+    } catch (err) {
+      UI.showToast(err.message || 'Invalid username or password.', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = '🔑 Sign In';
+      }
+    }
+  },
+
+  async handleSignUp(e) {
+    e.preventDefault();
+    const btnSubmit = document.getElementById('btn-submit-signup');
+    const fullNameInput = document.getElementById('signup-fullname');
+    const usernameInput = document.getElementById('signup-username');
+    const emailInput = document.getElementById('signup-email');
+    const roleInput = document.getElementById('signup-role');
+    const passwordInput = document.getElementById('signup-password');
+
+    if (!usernameInput || !emailInput || !passwordInput) return;
+
+    const full_name = fullNameInput ? fullNameInput.value.trim() : '';
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const role = roleInput ? roleInput.value : 'manager';
+    const password = passwordInput.value;
+
+    try {
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Creating Account...';
+      }
+
+      const res = await API.auth.signup({ full_name, username, email, role, password });
+
+      if (res.success && res.token && res.user) {
+        this.authState.currentUser = res.user;
+        this.authState.token = res.token;
+        this.authState.isLoggedIn = true;
+
+        localStorage.setItem('dinemind_user', JSON.stringify(res.user));
+        localStorage.setItem('dinemind_token', res.token);
+
+        this.renderAuthUI();
+        UI.closeModal('modal-signup');
+        UI.showToast(`Account created successfully! Welcome, ${res.user.full_name}.`, 'success');
+
+        // Reset form
+        document.getElementById('form-signup').reset();
+      }
+    } catch (err) {
+      UI.showToast(err.message || 'Failed to create account.', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = '✨ Create Account';
+      }
+    }
+  },
+
+  async handleSignOut(silent = false) {
+    try {
+      await API.auth.logout();
+    } catch (e) {
+      // Ignore network logout error
+    }
+
+    this.authState.currentUser = null;
+    this.authState.token = null;
+    this.authState.isLoggedIn = false;
+    this.authState.isVisitor = false;
+
+    localStorage.removeItem('dinemind_user');
+    localStorage.removeItem('dinemind_token');
+    sessionStorage.removeItem('dinemind_visitor');
+
+    this.renderAuthUI();
+    this.lockDashboard();
+
+    if (!silent) {
+      UI.showToast('You have been signed out.', 'info');
     }
   }
 };

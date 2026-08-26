@@ -26,11 +26,13 @@ const API = {
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
     const csrfToken = this.getCookie('csrftoken');
+    const authToken = localStorage.getItem('dinemind_token');
 
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+      ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
       ...options.headers,
     };
 
@@ -85,5 +87,27 @@ const API = {
 
   delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
+  },
+
+  auth: {
+    signup(userData) {
+      return API.post('/auth/signup', userData);
+    },
+    login(credentials) {
+      return API.post('/auth/login', credentials);
+    },
+    getMe() {
+      return API.get('/auth/me');
+    },
+    logout() {
+      return API.post('/auth/logout', {});
+    },
+    getRestaurantProfile() {
+      return API.get('/auth/restaurant');
+    },
+    saveRestaurantProfile(data) {
+      return API.post('/auth/restaurant', data);
+    }
   }
 };
+
