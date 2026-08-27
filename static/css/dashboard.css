@@ -345,10 +345,11 @@
 
 .hero-greeting {
   font-family: 'Playfair Display', serif;
-  font-size: 1.85rem;
+  font-size: clamp(1.25rem, 3.5vw, 1.85rem);
   font-weight: 800;
   margin-bottom: 6px;
   color: var(--text-1);
+  word-break: break-word;
 }
 
 .hero-sub {
@@ -408,7 +409,7 @@
 /* ─── 7. KPI Metrics Grid ─── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-bottom: 28px;
 }

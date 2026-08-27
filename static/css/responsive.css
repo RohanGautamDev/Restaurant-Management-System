@@ -1,22 +1,39 @@
 /* ═══════════════════════════════════════════════════════════════
-   DineMind AI — responsive.css
-   Breakpoints for tablet, mobile, collapsible drawer & performance tuning
+   DineMind AI — responsive.css  (COMPLETE REWRITE)
+   All breakpoints: Desktop → Tablet → Mobile → XS
    ═══════════════════════════════════════════════════════════════ */
 
-/* Global Mobile Overflow Prevention */
-html, body, .app-container, .main-wrapper {
+/* ─── Global: prevent horizontal scroll on ALL screens ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
   overflow-x: hidden;
   max-width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-container,
+.main-wrapper,
+.content-area {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* ─── Topbar Restaurant Brand Name ─── */
 .topbar-restaurant-brand {
   font-weight: 700;
-  color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  max-width: 200px;
   font-size: 0.88rem;
   background: linear-gradient(135deg, #ffffff 0%, var(--gold-light) 100%);
   -webkit-background-clip: text;
@@ -29,7 +46,7 @@ html, body, .app-container, .main-wrapper {
   flex-shrink: 0;
 }
 
-/* ─── Sidebar Footer Button (Restaurant Settings) ─── */
+/* ─── Sidebar Footer Button ─── */
 .sidebar-footer-btn {
   display: flex;
   align-items: center;
@@ -46,6 +63,7 @@ html, body, .app-container, .main-wrapper {
   transition: all 0.2s ease;
   text-align: left;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .sidebar-footer-btn:hover {
@@ -55,13 +73,11 @@ html, body, .app-container, .main-wrapper {
 }
 
 .sidebar-footer-btn span:last-child {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
 }
 
-/* ─── Form Hint ─── */
+/* ─── Form Hint text ─── */
 .form-hint {
   font-size: 0.74rem;
   color: var(--text-3);
@@ -69,7 +85,7 @@ html, body, .app-container, .main-wrapper {
   line-height: 1.4;
 }
 
-/* Mobile Hamburger Toggle Button (Hidden on Desktop) */
+/* ─── Mobile Hamburger (hidden on desktop) ─── */
 .mobile-menu-toggle {
   display: none;
   background: rgba(255, 255, 255, 0.08);
@@ -77,6 +93,7 @@ html, body, .app-container, .main-wrapper {
   color: var(--gold);
   width: 38px;
   height: 38px;
+  min-width: 38px;
   border-radius: var(--r-sm);
   font-size: 1.2rem;
   align-items: center;
@@ -91,7 +108,7 @@ html, body, .app-container, .main-wrapper {
   border-color: var(--gold);
 }
 
-/* Sidebar Drawer Backdrop Overlay */
+/* ─── Sidebar Backdrop ─── */
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -109,22 +126,25 @@ html, body, .app-container, .main-wrapper {
   pointer-events: auto;
 }
 
-/* ─── Tablets & Mobile (<= 860px) ─── */
+/* ══════════════════════════════════════════════════════
+   TABLET  ≤ 860px
+   ══════════════════════════════════════════════════════ */
 @media (max-width: 860px) {
+
+  /* Show hamburger */
   .mobile-menu-toggle {
     display: flex;
   }
 
-  /* Mobile Performance Fix: Disable heavy background blur orbs on mobile screens to free up GPU */
+  /* Disable heavy GPU orbs */
   .orb {
     display: none !important;
   }
 
+  /* Sidebar becomes slide-in drawer */
   .sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
+    top: 0; left: 0; bottom: 0;
     z-index: 999;
     width: 270px;
     transform: translateX(-100%);
@@ -136,22 +156,23 @@ html, body, .app-container, .main-wrapper {
     transform: translateX(0);
   }
 
+  /* Main fills full width */
   .main-wrapper {
     margin-left: 0 !important;
     width: 100% !important;
     max-width: 100vw !important;
   }
 
+  /* Topbar */
   .topbar {
     padding: 0 16px;
     height: 60px;
-    gap: 0;
   }
 
   .topbar-left {
     gap: 10px;
     min-width: 0;
-    flex: 1;
+    flex: 1 1 auto;
     overflow: hidden;
   }
 
@@ -160,27 +181,30 @@ html, body, .app-container, .main-wrapper {
     flex-shrink: 0;
   }
 
-  .topbar-left .breadcrumbs {
-    font-size: 0.80rem;
+  .breadcrumbs {
     min-width: 0;
     overflow: hidden;
   }
 
   .topbar-restaurant-brand {
-    max-width: 100px;
-    font-size: 0.80rem;
+    max-width: 120px;
   }
 
+  /* Content */
+  .content-area {
+    padding: 20px 16px;
+  }
+
+  /* Hero banner stacks */
   .hero-banner {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    padding: 20px;
+    padding: 22px 20px;
   }
 
   .hero-visual {
     align-self: center;
-    margin-top: 8px;
   }
 
   .hero-visual .edge-pinwheel-wrap,
@@ -189,26 +213,32 @@ html, body, .app-container, .main-wrapper {
     height: 90px !important;
   }
 
+  /* KPI: 2 columns on tablet */
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
 }
 
-/* ─── Mobile Devices (<= 640px) ─── */
+/* ══════════════════════════════════════════════════════
+   MOBILE  ≤ 640px
+   ══════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
+
+  /* Content padding */
   .content-area {
-    padding: 12px;
+    padding: 14px 12px;
   }
 
-  /* ─── Topbar: strict single-row layout ─── */
+  /* ── Topbar: strict single row, no overflow ── */
   .topbar {
     padding: 0 10px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
+    gap: 4px;
+    overflow: hidden;
   }
 
   .topbar-left {
@@ -216,70 +246,82 @@ html, body, .app-container, .main-wrapper {
     align-items: center;
     gap: 6px;
     min-width: 0;
-    flex: 1;
+    flex: 1 1 auto;
     overflow: hidden;
+  }
+
+  .mobile-menu-toggle {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    font-size: 1rem;
   }
 
   .breadcrumbs {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     min-width: 0;
     overflow: hidden;
   }
 
-  /* Hide "DineMind AI /" prefix on mobile, only show current page */
+  /* Hide "BrandName /" on mobile — show only current page */
   .topbar-restaurant-brand,
   .breadcrumbs-sep {
     display: none;
   }
 
   .breadcrumbs-current {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 90px;
+    max-width: 100px;
   }
 
   .topbar-right {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     flex-shrink: 0;
   }
 
-  /* Hide clock on mobile */
+  /* Hide clock */
   .topbar-right .live-clock {
     display: none !important;
   }
 
-  /* Shrink Kitchen pill to icon only */
-  .topbar-right .live-status-pill span:last-child {
-    display: none;
-  }
-
+  /* Kitchen pill: icon (dot) only */
   .topbar-right .live-status-pill {
     padding: 6px 8px;
-    min-width: 32px;
+    min-width: 30px;
     justify-content: center;
   }
 
-  /* Hide "New Order" text, keep icon only */
+  .topbar-right .live-status-pill span:not(.status-dot) {
+    display: none;
+  }
+
+  /* New Order: icon (⚡) only */
   .topbar-right .btn-gold span:last-child {
     display: none;
   }
 
   .topbar-right .btn-gold {
     padding: 6px 10px;
-    min-width: 36px;
+    min-width: 34px;
+    gap: 0;
   }
 
-  /* Auth controls: avatar only, no text */
+  /* Auth pill: avatar only */
   .user-name-title,
   .user-role-tag {
+    display: none !important;
+  }
+
+  .user-info-text {
     display: none !important;
   }
 
@@ -289,60 +331,112 @@ html, body, .app-container, .main-wrapper {
   }
 
   .btn-signout {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     padding: 3px 7px;
   }
 
-  /* ─── KPI Grid: single column ─── */
+  /* ── Hero Banner ── */
+  .hero-banner {
+    padding: 16px 14px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .hero-greeting {
+    font-size: 1.35rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .hero-sub {
+    font-size: 0.82rem !important;
+  }
+
+  .hero-ai-chip {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+  }
+
+  .hero-visual .edge-pinwheel-wrap,
+  .hero-visual svg {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  /* ── KPI Grid: 1 column on mobile ── */
   .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .kpi-card {
+    padding: 18px;
+    min-height: 110px;
+  }
+
+  .kpi-value {
+    font-size: 1.7rem;
+  }
+
+  /* ── Chart / Analytics ── */
+  .chart-card {
+    padding: 16px;
+  }
+
+  /* ── KDS Kitchen columns ── */
+  .kds-columns-wrap {
+    flex-direction: column !important;
+    gap: 14px;
+  }
+
+  /* ── Tables grid: 1 col ── */
+  .table-floor-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* ── Menu matrix: 1 col ── */
+  .menu-card-matrix {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* ── Stats grid ── */
+  .stats-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .hero-banner {
-    padding: 14px;
-  }
-
-  .hero-title,
-  .hero-banner h1,
-  .hero-banner h2 {
-    font-size: clamp(1.1rem, 5.5vw, 1.6rem) !important;
-    line-height: 1.25 !important;
-    word-break: break-word;
-  }
-
-  .hero-subtitle,
-  .hero-banner p {
-    font-size: 0.82rem !important;
-  }
-
+  /* ── Forms ── */
   .form-row {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .table-floor-grid {
-    grid-template-columns: 1fr;
+  /* ── Marquee / kinetic banner ── */
+  .kinetic-marquee-wrap {
+    font-size: 0.7rem;
   }
 
-  .menu-card-matrix {
-    grid-template-columns: 1fr;
+  /* ── Modals ── */
+  .modal-box {
+    margin: 12px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* ─── Landing Gate Mobile ─── */
+  /* ── Login Gate ── */
   .gate-overlay {
-    padding: 16px 12px;
+    padding: 16px 10px 32px;
     align-items: flex-start;
   }
 
   .gate-card {
-    padding: 24px 16px 20px;
+    padding: 22px 14px 18px;
     max-width: 100%;
-    margin: auto 0;
-    /* No max-height — overlay itself scrolls */
+    width: 100%;
   }
 
   .gate-title {
@@ -353,7 +447,6 @@ html, body, .app-container, .main-wrapper {
     font-size: 11px;
   }
 
-  .demo-chips-grid,
   .gate-demo-chips {
     flex-direction: column;
     gap: 6px;
@@ -367,24 +460,37 @@ html, body, .app-container, .main-wrapper {
   }
 }
 
-/* ─── Extra Small Mobile Devices (<= 400px) ─── */
+/* ══════════════════════════════════════════════════════
+   EXTRA SMALL  ≤ 400px
+   ══════════════════════════════════════════════════════ */
 @media (max-width: 400px) {
+
+  /* Hide New Order button entirely */
   .topbar-right .btn-gold {
-    display: none;
+    display: none !important;
   }
 
+  /* Hide kitchen pill */
   .topbar-right .live-status-pill {
-    display: none;
+    display: none !important;
   }
 
-  /* Ensure auth button still shows */
+  /* Keep auth pill always visible */
   .topbar-right .user-profile-pill,
   .topbar-right .btn-glass {
     display: flex !important;
   }
+
+  .hero-greeting {
+    font-size: 1.2rem !important;
+  }
+
+  .table-floor-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* ─── Reduced Motion Support ─── */
+/* ─── Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -392,4 +498,3 @@ html, body, .app-container, .main-wrapper {
     transition-duration: 0.01ms !important;
   }
 }
-
