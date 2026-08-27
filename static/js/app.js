@@ -22,6 +22,23 @@ const App = {
     this.bindNavigation();
     this.navigate('dashboard');
     this.startLiveSync();
+    this.initMobileKeyboardScroll();
+  },
+
+  // Scroll focused input into view when mobile keyboard opens
+  initMobileKeyboardScroll() {
+    // When any input inside the gate overlay is focused, scroll it into view
+    document.addEventListener('focusin', (e) => {
+      const overlay = document.getElementById('login-landing-screen');
+      if (!overlay || overlay.style.display === 'none') return;
+      if (!overlay.contains(e.target)) return;
+      if (!['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+      // Small delay lets the keyboard fully open before we scroll
+      setTimeout(() => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 320);
+    });
   },
 
   activeOrdersFilter: 'all',
@@ -1280,20 +1297,38 @@ const App = {
     const container = document.getElementById('topbar-auth-container');
     if (!container) return;
 
+    // Helper: update the dashboard hero greeting with real user name
+    const updateGreeting = (name) => {
+      const greet = document.getElementById('dashboard-greeting');
+      if (!greet) return;
+      if (name) {
+        // Use only first name for greeting
+        const firstName = name.split(' ')[0];
+        greet.textContent = `Welcome back, ${firstName} 👋`;
+      } else {
+        greet.textContent = 'Welcome 👋';
+      }
+    };
+
     if (this.authState.isLoggedIn && this.authState.currentUser) {
       const user = this.authState.currentUser;
       const initial = (user.full_name || user.username || 'U').charAt(0).toUpperCase();
+      const displayName = user.full_name || user.username;
 
       container.innerHTML = `
         <div class="user-profile-pill">
           <div class="user-avatar-icon">${initial}</div>
           <div class="user-info-text">
-            <span class="user-name-title">${user.full_name || user.username}</span>
+            <span class="user-name-title">${displayName}</span>
             <span class="user-role-tag">${user.role}</span>
           </div>
           <button class="btn-signout ml-4" onclick="App.handleSignOut()" title="Sign Out">Sign Out</button>
         </div>
       `;
+
+      // Update dashboard greeting with actual user name
+      updateGreeting(displayName);
+
     } else if (this.authState.isVisitor) {
       container.innerHTML = `
         <div class="user-profile-pill">
@@ -1305,6 +1340,7 @@ const App = {
           <button class="btn btn-gold btn-xs ml-4" onclick="App.lockDashboard()">Sign In</button>
         </div>
       `;
+      updateGreeting('Guest');
     } else {
       container.innerHTML = `
         <button class="btn btn-glass btn-sm" onclick="App.openSignInModal()">
@@ -1456,10 +1492,22 @@ const App = {
     this.authState.token = null;
     this.authState.isLoggedIn = false;
     this.authState.isVisitor = false;
+    this.restaurantProfile = null;
 
     localStorage.removeItem('dinemind_user');
     localStorage.removeItem('dinemind_token');
     sessionStorage.removeItem('dinemind_visitor');
+
+    // Reset greeting and restaurant branding
+    const greet = document.getElementById('dashboard-greeting');
+    if (greet) greet.textContent = 'Welcome 👋';
+    const topbarName = document.getElementById('topbar-restaurant-name');
+    if (topbarName) topbarName.textContent = 'DineMind AI';
+    const sidebarLabel = document.getElementById('sidebar-restaurant-label');
+    if (sidebarLabel) sidebarLabel.textContent = 'My Restaurant';
+    const logoTitle = document.querySelector('.sidebar-logo-title');
+    if (logoTitle) logoTitle.textContent = 'DineMind';
+    document.title = 'DineMind AI — Smart Restaurant Operations Platform';
 
     this.renderAuthUI();
     this.lockDashboard();

@@ -600,31 +600,25 @@ textarea.form-control {
 /* ─── 10. Full-Screen Motion UI Login Landing Gate ─── */
 .gate-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 9999;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 24px 16px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 16px 40px;
+  /* overflow-y: auto lets the card scroll when keyboard shrinks viewport */
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   background: radial-gradient(circle at center, rgba(13, 18, 38, 0.92) 0%, rgba(6, 9, 20, 0.98) 100%);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Center card vertically when there's enough space */
-@supports (min-height: 100dvh) {
-  .gate-overlay {
-    min-height: 100dvh;
-  }
-}
-
-.gate-overlay::before {
-  content: '';
-  flex-shrink: 0;
-  margin: auto;
 }
 
 .gate-overlay.fade-out {
@@ -632,6 +626,7 @@ textarea.form-control {
   transform: scale(1.05);
   pointer-events: none;
 }
+
 
 .gate-card {
   width: 100%;
