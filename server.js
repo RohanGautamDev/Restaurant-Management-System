@@ -34,6 +34,7 @@ app.get('/api/health', (req, res) => {
 // Public config endpoint — serves non-secret client config
 app.get('/api/config', (req, res) => {
   res.json({
+    mapplsApiKey: process.env.VITE_MAPPLS_API_KEY || process.env.MAPPLS_API_KEY || 'mdwallaqjppbxotocjucfjxjronwpotbclru',
     googleMapsKey: process.env.GOOGLE_MAPS_API_KEY || ''
   });
 });
