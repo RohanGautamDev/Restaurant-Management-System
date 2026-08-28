@@ -1,180 +1,279 @@
 /**
  * DineMind AI — Location Picker
- * Uses Leaflet.js + OpenStreetMap (free, no API key needed)
- * Nominatim for geocoding and reverse geocoding
+ * Uses REAL Google Maps JavaScript API
+ * API key loaded from server → /api/config → process.env.GOOGLE_MAPS_API_KEY
+ *
+ * Flow:
+ *   1. LocationPicker.open() → fetch /api/config → get Google Maps API key
+ *   2. Load Google Maps JS API dynamically
+ *   3. Create map with Places Autocomplete + Geocoder
+ *   4. GPS, draggable marker, emoji selector, discovery animation
+ *   5. confirmLocation() → fills hidden form fields → mini preview map
  */
 
 const LocationPicker = (() => {
-  let map = null;
-  let marker = null;
+  // ── State ──────────────────────────────────────────────────────────────
+  let googleMap = null;
+  let mapMarker = null;
+  let geocoder = null;
+  let autocomplete = null;
   let selectedLat = null;
   let selectedLng = null;
-  let selectedAddress = null;
+  let selectedAddress = '';
   let selectedEmoji = '🍽️';
-  let searchTimeout = null;
+  let mapsApiKey = null;
+  let mapsLoaded = false;
   let miniMap = null;
   let miniMarker = null;
-  let isOpen = false;
 
-  // ─── Nominatim API (free, no key needed) ───
-  const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
-
-  async function reverseGeocode(lat, lng) {
-    try {
-      const res = await fetch(
-        `${NOMINATIM_BASE}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      return await res.json();
-    } catch (e) {
-      return null;
+  // ── Load Google Maps API dynamically ───────────────────────────────────
+  async function loadGoogleMapsAPI(apiKey) {
+    if (mapsLoaded || window.google?.maps) {
+      mapsLoaded = true;
+      return true;
     }
-  }
 
-  async function searchAddress(query) {
-    try {
-      const res = await fetch(
-        `${NOMINATIM_BASE}/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  }
+    return new Promise((resolve, reject) => {
+      if (!apiKey) {
+        reject(new Error('No Google Maps API key configured.'));
+        return;
+      }
 
-  // ─── Emoji Marker factory ───
-  function createEmojiMarker(lat, lng, emoji, draggable = true) {
-    const icon = L.divIcon({
-      html: `<div class="lp-emoji-marker" id="lp-emoji-marker-el">${emoji}</div>`,
-      iconSize: [48, 48],
-      iconAnchor: [24, 48],
-      className: '',
+      // Callback name to signal load complete
+      window.__gmaps_cb = () => {
+        mapsLoaded = true;
+        resolve(true);
+      };
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__gmaps_cb&loading=async`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => reject(new Error('Failed to load Google Maps.'));
+      document.head.appendChild(script);
     });
-    return L.marker([lat, lng], { icon, draggable });
   }
 
-  // ─── Init Map ───
-  function initMap() {
-    if (map) return;
+  // ── Fetch API key from server ───────────────────────────────────────────
+  async function fetchApiKey() {
+    if (mapsApiKey !== null) return mapsApiKey;
+    try {
+      const res = await fetch('/api/config');
+      const data = await res.json();
+      mapsApiKey = data.googleMapsKey || '';
+    } catch (e) {
+      mapsApiKey = '';
+    }
+    return mapsApiKey;
+  }
 
-    map = L.map('lp-map', {
-      center: [20.5937, 78.9629], // India center default
+  // ── Init Google Map inside modal ────────────────────────────────────────
+  function initGoogleMap() {
+    if (googleMap) {
+      // Map already exists — just resize
+      google.maps.event.trigger(googleMap, 'resize');
+      return;
+    }
+
+    const mapDiv = document.getElementById('lp-map');
+    if (!mapDiv) return;
+
+    // Default center: India
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+
+    googleMap = new google.maps.Map(mapDiv, {
+      center: defaultCenter,
       zoom: 5,
-      zoomControl: false,
+      mapTypeId: 'roadmap',
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      gestureHandling: 'greedy',
+      styles: [
+        { elementType: 'geometry', stylers: [{ color: '#0d1225' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1225' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#8a9bc9' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a2140' }] },
+        { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#6279a0' }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#060c1e' }] },
+        { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#111827' }] },
+        { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#5a7099' }] },
+        { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#111827' }] },
+        { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#1e2d4f' }] },
+        { featureType: 'administrative.land_parcel', elementType: 'labels.text.fill', stylers: [{ color: '#4e6a9a' }] },
+        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#0d1225' }] },
+      ],
     });
 
-    // Custom zoom control position
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    geocoder = new google.maps.Geocoder();
 
-    // OpenStreetMap tiles (free)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
-
-    // Click on map to set location
-    map.on('click', async (e) => {
-      await setLocation(e.latlng.lat, e.latlng.lng, true);
+    // Click on map → drop marker + reverse geocode
+    googleMap.addListener('click', (event) => {
+      placeMarker(event.latLng.lat(), event.latLng.lng(), true);
     });
 
-    // Fix Leaflet map tiles not loading when modal opens
-    setTimeout(() => map.invalidateSize(), 300);
+    // Setup Places Autocomplete on the search input
+    setupAutocomplete();
   }
 
-  // ─── Set Location ───
-  async function setLocation(lat, lng, geocode = true) {
+  // ── Places Autocomplete ─────────────────────────────────────────────────
+  function setupAutocomplete() {
+    const input = document.getElementById('lp-search-input');
+    if (!input || !google?.maps?.places) return;
+
+    autocomplete = new google.maps.places.Autocomplete(input, {
+      fields: ['formatted_address', 'geometry', 'name', 'address_components'],
+      types: ['establishment', 'geocode'],
+    });
+
+    // Style the autocomplete dropdown
+    injectAutocompleteStyles();
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry || !place.geometry.location) {
+        showToast('⚠️ Please select a location from the dropdown.', 'error');
+        return;
+      }
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      placeMarker(lat, lng, false);
+      fillAddressFromPlace(place);
+    });
+  }
+
+  // ── Place / Move Marker ─────────────────────────────────────────────────
+  function placeMarker(lat, lng, reverseGeocode) {
     selectedLat = lat;
     selectedLng = lng;
 
-    // Remove old marker
-    if (marker) map.removeLayer(marker);
+    const pos = { lat, lng };
 
-    // Add emoji marker with drop animation
-    marker = createEmojiMarker(lat, lng, selectedEmoji);
-    marker.addTo(map);
+    if (mapMarker) {
+      // Animate marker to new position
+      mapMarker.setPosition(pos);
+    } else {
+      // Create custom emoji marker
+      mapMarker = new google.maps.Marker({
+        position: pos,
+        map: googleMap,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        icon: makeGoogleMarkerIcon(selectedEmoji),
+        title: 'Your Restaurant Location',
+      });
 
-    // Drag to fine-tune
-    marker.on('dragend', async (e) => {
-      const pos = e.target.getLatLng();
-      await setLocation(pos.lat, pos.lng, true);
-    });
-
-    // Animate marker drop
-    const markerEl = document.getElementById('lp-emoji-marker-el');
-    if (markerEl) {
-      markerEl.classList.add('lp-marker-drop');
-      setTimeout(() => markerEl.classList.remove('lp-marker-drop'), 700);
+      // Drag end → reverse geocode new position
+      mapMarker.addListener('dragend', (e) => {
+        const newLat = e.latLng.lat();
+        const newLng = e.latLng.lng();
+        selectedLat = newLat;
+        selectedLng = newLng;
+        doReverseGeocode(newLat, newLng);
+      });
     }
+
+    // Smooth fly-to
+    googleMap.panTo(pos);
+    googleMap.setZoom(Math.max(googleMap.getZoom(), 16));
 
     // Enable confirm button
-    const confirmBtn = document.getElementById('lp-confirm-btn');
-    if (confirmBtn) confirmBtn.disabled = false;
+    enableConfirm(true);
 
-    if (geocode) {
-      // Update status
-      setInfoText('🔄 Getting address...');
-      const data = await reverseGeocode(lat, lng);
-      if (data && data.display_name) {
-        selectedAddress = data.display_name;
-        const addr = data.address || {};
+    if (reverseGeocode) {
+      doReverseGeocode(lat, lng);
+    }
+  }
 
-        const city = addr.city || addr.town || addr.village || addr.county || '';
-        const state = addr.state || '';
-        const country = addr.country || '';
-        const postcode = addr.postcode || '';
+  // ── Custom Marker Icon ──────────────────────────────────────────────────
+  function makeGoogleMarkerIcon(emoji) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 52;
+    canvas.height = 52;
+    const ctx = canvas.getContext('2d');
 
-        // Update footer info
-        setInfoText(`📍 ${truncate(data.display_name, 60)}`);
+    // Gold circle background
+    ctx.beginPath();
+    ctx.arc(26, 24, 22, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(10,14,30,0.92)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(245,200,66,0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
 
-        // Show discovery card
-        showDiscoveryCard(data.display_name, lat, lng, city, state, country, postcode);
+    // Emoji
+    ctx.font = '22px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, 26, 24);
 
-        // Store extracted fields
-        window._lpAddressData = { lat, lng, address: data.display_name, city, state, country, postcode };
+    return {
+      url: canvas.toDataURL(),
+      scaledSize: new google.maps.Size(52, 52),
+      anchor: new google.maps.Point(26, 52),
+    };
+  }
+
+  // ── Reverse Geocode via Google Geocoder ─────────────────────────────────
+  function doReverseGeocode(lat, lng) {
+    setInfoText('🔄 Getting address from Google Maps...');
+    if (!geocoder) return;
+
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const place = results[0];
+        selectedAddress = place.formatted_address;
+        fillAddressFromGeocodeResult(place, lat, lng);
       } else {
-        selectedAddress = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        setInfoText(`📍 Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+        selectedAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        setInfoText(`📍 ${selectedAddress}`);
         window._lpAddressData = { lat, lng, address: selectedAddress, city: '', state: '', country: '', postcode: '' };
+        showDiscoveryCard(selectedAddress, lat, lng, '', '', '', '');
       }
-    }
-
-    // Smooth map pan to location
-    map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 1.2 });
+    });
   }
 
-  // ─── Discovery Card Animation ───
-  function showDiscoveryCard(address, lat, lng, city, state, country, postcode) {
-    const card = document.getElementById('lp-discovery-card');
-    const addrEl = document.getElementById('lp-discovery-address');
-    const metaEl = document.getElementById('lp-discovery-meta');
-    const iconEl = document.getElementById('lp-discovery-icon');
-
-    if (!card) return;
-
-    if (addrEl) addrEl.textContent = address;
-    if (metaEl) {
-      metaEl.innerHTML = `
-        ${city ? `<span class="lp-meta-chip">🏙️ ${city}</span>` : ''}
-        ${state ? `<span class="lp-meta-chip">🗺️ ${state}</span>` : ''}
-        ${country ? `<span class="lp-meta-chip">🌍 ${country}</span>` : ''}
-        ${postcode ? `<span class="lp-meta-chip">📮 ${postcode}</span>` : ''}
-        <span class="lp-meta-chip">📐 ${lat.toFixed(4)}, ${lng.toFixed(4)}</span>
-      `;
-    }
-    if (iconEl) iconEl.textContent = selectedEmoji;
-
-    card.style.display = 'flex';
-    // Trigger animation
-    card.classList.remove('lp-discovery-animate');
-    void card.offsetWidth;
-    card.classList.add('lp-discovery-animate');
+  // ── Extract Address Components ──────────────────────────────────────────
+  function fillAddressFromPlace(place) {
+    const comps = place.address_components || [];
+    const addr = extractAddressComponents(comps);
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    selectedAddress = place.formatted_address;
+    window._lpAddressData = { lat, lng, address: selectedAddress, ...addr };
+    setInfoText(`📍 ${truncate(selectedAddress, 60)}`);
+    showDiscoveryCard(selectedAddress, lat, lng, addr.city, addr.state, addr.country, addr.postcode);
+    enableConfirm(true);
   }
 
-  // ─── GPS: Use My Location ───
+  function fillAddressFromGeocodeResult(result, lat, lng) {
+    const comps = result.address_components || [];
+    const addr = extractAddressComponents(comps);
+    selectedAddress = result.formatted_address;
+    window._lpAddressData = { lat, lng, address: selectedAddress, ...addr };
+    setInfoText(`📍 ${truncate(selectedAddress, 60)}`);
+    showDiscoveryCard(selectedAddress, lat, lng, addr.city, addr.state, addr.country, addr.postcode);
+  }
+
+  function extractAddressComponents(components) {
+    const get = (type) => {
+      const c = components.find(c => c.types.includes(type));
+      return c ? c.long_name : '';
+    };
+    return {
+      city: get('locality') || get('administrative_area_level_2') || get('sublocality_level_1'),
+      state: get('administrative_area_level_1'),
+      country: get('country'),
+      postcode: get('postal_code'),
+    };
+  }
+
+  // ── GPS: Use My Location ────────────────────────────────────────────────
   function useMyLocation() {
     if (!navigator.geolocation) {
-      showStatus('❌ Geolocation is not supported by your browser.', 'error');
+      showToast('❌ Geolocation not supported by your browser.', 'error');
       return;
     }
 
@@ -183,121 +282,91 @@ const LocationPicker = (() => {
     setInfoText('🛰️ Detecting your GPS location...');
 
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         if (loadingEl) loadingEl.style.display = 'none';
-        await setLocation(pos.coords.latitude, pos.coords.longitude, true);
-        showStatus('✅ Location detected via GPS!', 'success');
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        placeMarker(lat, lng, true);
+        showToast('✅ GPS location detected!', 'success');
       },
       (err) => {
         if (loadingEl) loadingEl.style.display = 'none';
-        let msg = '❌ Could not detect location. ';
-        if (err.code === 1) msg += 'Please allow location access in your browser.';
+        let msg = 'Could not get location. ';
+        if (err.code === 1) msg += 'Please allow location access in your browser settings.';
         else if (err.code === 2) msg += 'Position unavailable.';
         else msg += 'Request timed out.';
-        setInfoText(msg);
-        showStatus(msg, 'error');
+        showToast('❌ ' + msg, 'error');
+        setInfoText('❌ ' + msg);
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
   }
 
-  // ─── Search Input Handler ───
-  function onSearchInput(value) {
-    clearTimeout(searchTimeout);
-    const list = document.getElementById('lp-suggestions-list');
+  // ── Discovery Animation Card ────────────────────────────────────────────
+  function showDiscoveryCard(address, lat, lng, city, state, country, postcode) {
+    const card = document.getElementById('lp-discovery-card');
+    if (!card) return;
 
-    if (!value || value.length < 3) {
-      if (list) list.style.display = 'none';
-      return;
+    const addrEl = document.getElementById('lp-discovery-address');
+    const metaEl = document.getElementById('lp-discovery-meta');
+    const iconEl = document.getElementById('lp-discovery-icon');
+
+    if (addrEl) addrEl.textContent = address;
+    if (iconEl) iconEl.textContent = selectedEmoji;
+    if (metaEl) {
+      metaEl.innerHTML = [
+        city    && `<span class="lp-meta-chip">🏙️ ${city}</span>`,
+        state   && `<span class="lp-meta-chip">🗺️ ${state}</span>`,
+        country && `<span class="lp-meta-chip">🌍 ${country}</span>`,
+        postcode&& `<span class="lp-meta-chip">📮 ${postcode}</span>`,
+        `<span class="lp-meta-chip">📐 ${lat.toFixed(4)}, ${lng.toFixed(4)}</span>`,
+      ].filter(Boolean).join('');
     }
 
-    searchTimeout = setTimeout(async () => {
-      const results = await searchAddress(value);
-      renderSuggestions(results);
-    }, 400);
+    card.style.display = 'flex';
+    card.classList.remove('lp-discovery-animate');
+    void card.offsetWidth;
+    card.classList.add('lp-discovery-animate');
   }
 
-  function renderSuggestions(results) {
-    const list = document.getElementById('lp-suggestions-list');
-    if (!list) return;
-
-    if (!results || results.length === 0) {
-      list.innerHTML = '<div class="lp-suggestion-empty">No results found. Try a different search.</div>';
-      list.style.display = 'block';
-      return;
-    }
-
-    list.innerHTML = results.map((r, i) => `
-      <div class="lp-suggestion-item" onclick="LocationPicker.selectSuggestion(${r.lat}, ${r.lon}, '${escapeJs(r.display_name)}')">
-        <span class="lp-sug-icon">📍</span>
-        <div class="lp-sug-text">
-          <div class="lp-sug-name">${highlightMatch(r.display_name)}</div>
-          <div class="lp-sug-type">${r.type || ''} ${r.address ? '· ' + (r.address.country || '') : ''}</div>
-        </div>
-      </div>
-    `).join('');
-    list.style.display = 'block';
-  }
-
-  async function selectSuggestion(lat, lng, name) {
-    // Close suggestions
-    const list = document.getElementById('lp-suggestions-list');
-    if (list) list.style.display = 'none';
-
-    // Update search input
-    const input = document.getElementById('lp-search-input');
-    if (input) input.value = name;
-
-    await setLocation(parseFloat(lat), parseFloat(lng), true);
-  }
-
-  // ─── Marker Emoji Selector ───
+  // ── Marker Emoji Selector ───────────────────────────────────────────────
   function selectMarker(btn, emoji) {
     selectedEmoji = emoji;
-
-    // Update button states
     document.querySelectorAll('.lp-marker-opt').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    // Update existing marker on map
-    if (marker && selectedLat) {
-      map.removeLayer(marker);
-      marker = createEmojiMarker(selectedLat, selectedLng, selectedEmoji);
-      marker.addTo(map);
-      marker.on('dragend', async (e) => {
-        const pos = e.target.getLatLng();
-        await setLocation(pos.lat, pos.lng, true);
-      });
+    // Update Google marker icon
+    if (mapMarker) {
+      mapMarker.setIcon(makeGoogleMarkerIcon(emoji));
     }
 
-    // Update discovery card icon
     const iconEl = document.getElementById('lp-discovery-icon');
     if (iconEl) iconEl.textContent = emoji;
 
-    // Update hidden input
     const emojiInput = document.getElementById('signup-marker-emoji');
     if (emojiInput) emojiInput.value = emoji;
   }
 
-  // ─── Confirm Location ───
+  // ── Confirm Location ────────────────────────────────────────────────────
   function confirmLocation() {
     if (!selectedLat || !selectedLng) return;
 
     const data = window._lpAddressData || {};
+    const lat = data.lat || selectedLat;
+    const lng = data.lng || selectedLng;
 
     // Populate hidden form fields
-    setValue('signup-lat', data.lat || selectedLat);
-    setValue('signup-lng', data.lng || selectedLng);
+    setValue('signup-lat', lat);
+    setValue('signup-lng', lng);
     setValue('signup-formatted-address', data.address || selectedAddress || '');
     setValue('signup-city', data.city || '');
     setValue('signup-country', data.country || '');
     setValue('signup-marker-emoji', selectedEmoji);
 
-    // Update the trigger button to show location set
+    // Hide trigger, show preview
     const trigger = document.getElementById('location-picker-trigger');
     if (trigger) trigger.style.display = 'none';
 
-    // Show preview card in signup form
     const previewCard = document.getElementById('location-preview-card');
     const previewAddr = document.getElementById('lp-preview-address');
     const previewCoords = document.getElementById('lp-preview-coords');
@@ -305,99 +374,181 @@ const LocationPicker = (() => {
 
     if (previewCard) previewCard.style.display = 'block';
     if (previewAddr) previewAddr.textContent = data.address || selectedAddress || '';
-    if (previewCoords) previewCoords.textContent = `${(data.lat || selectedLat).toFixed(5)}, ${(data.lng || selectedLng).toFixed(5)}`;
+    if (previewCoords) previewCoords.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     if (previewEmoji) previewEmoji.textContent = selectedEmoji;
 
-    // Init mini preview map
-    setTimeout(() => initMiniMap(data.lat || selectedLat, data.lng || selectedLng), 100);
+    // Mini preview map using Google Maps Static API
+    setTimeout(() => initMiniPreviewMap(lat, lng), 120);
 
-    // Close modal
     close();
-
-    if (typeof UI !== 'undefined' && UI.showToast) {
-      UI.showToast('📍 Restaurant location set successfully!', 'success');
-    }
+    showToast('📍 Restaurant location confirmed!', 'success');
   }
 
-  function initMiniMap(lat, lng) {
+  function initMiniPreviewMap(lat, lng) {
     const container = document.getElementById('lp-preview-mini-map');
-    if (!container || container._leaflet_id) return;
+    if (!container || container._gmapInit) return;
+    container._gmapInit = true;
 
-    miniMap = L.map(container, {
-      center: [lat, lng],
-      zoom: 15,
-      zoomControl: false,
-      dragging: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      boxZoom: false,
-      keyboard: false,
-      attributionControl: false,
+    miniMap = new google.maps.Map(container, {
+      center: { lat, lng },
+      zoom: 16,
+      disableDefaultUI: true,
+      gestureHandling: 'none',
+      styles: [ // Same dark style
+        { elementType: 'geometry', stylers: [{ color: '#0d1225' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#8a9bc9' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a2140' }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#060c1e' }] },
+        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#0d1225' }] },
+      ],
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(miniMap);
-
-    const icon = L.divIcon({
-      html: `<div class="lp-emoji-marker lp-mini-marker">${selectedEmoji}</div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      className: '',
+    new google.maps.Marker({
+      position: { lat, lng },
+      map: miniMap,
+      icon: makeGoogleMarkerIcon(selectedEmoji),
     });
-    L.marker([lat, lng], { icon }).addTo(miniMap);
-
-    setTimeout(() => miniMap.invalidateSize(), 200);
   }
 
-  // ─── Open / Close ───
-  function open() {
+  // ── Open Modal ──────────────────────────────────────────────────────────
+  async function open() {
     const overlay = document.getElementById('lp-modal-overlay');
     if (!overlay) return;
 
     overlay.style.display = 'flex';
-    overlay.classList.remove('lp-modal-hide');
     overlay.classList.add('lp-modal-show');
-    isOpen = true;
 
-    // Init map after display (needs visible container)
-    setTimeout(() => {
-      initMap();
-      if (map) map.invalidateSize();
-    }, 150);
+    // Show loading state in map while we load API
+    const loadingEl = document.getElementById('lp-map-loading');
 
-    // Close suggestions on outside click
-    document.addEventListener('click', onOutsideClick, true);
+    try {
+      const apiKey = await fetchApiKey();
+
+      if (!apiKey) {
+        // No API key — show setup instructions inside modal
+        showNoKeyMessage();
+        return;
+      }
+
+      if (loadingEl) {
+        loadingEl.style.display = 'flex';
+        loadingEl.innerHTML = `<div class="lp-loading-spinner"></div><span>Loading Google Maps...</span>`;
+      }
+
+      await loadGoogleMapsAPI(apiKey);
+
+      if (loadingEl) loadingEl.style.display = 'none';
+
+      // Init map AFTER modal is visible (needs visible container for sizing)
+      setTimeout(() => {
+        initGoogleMap();
+        if (googleMap) google.maps.event.trigger(googleMap, 'resize');
+      }, 200);
+
+    } catch (err) {
+      if (loadingEl) loadingEl.style.display = 'none';
+      console.error('LocationPicker:', err);
+      showNoKeyMessage(err.message);
+    }
   }
 
+  // ── No API Key Message ──────────────────────────────────────────────────
+  function showNoKeyMessage(customMsg) {
+    const mapDiv = document.getElementById('lp-map');
+    if (!mapDiv) return;
+
+    mapDiv.innerHTML = `
+      <div class="lp-nokey-screen">
+        <div class="lp-nokey-icon">🗝️</div>
+        <h3 class="lp-nokey-title">Google Maps API Key Required</h3>
+        <p class="lp-nokey-body">${customMsg || 'To enable the interactive map, add your Google Maps API key to the Vercel environment variables.'}</p>
+        <div class="lp-nokey-steps">
+          <div class="lp-step">
+            <span class="lp-step-num">1</span>
+            <span>Go to <strong>console.cloud.google.com</strong></span>
+          </div>
+          <div class="lp-step">
+            <span class="lp-step-num">2</span>
+            <span>Create a project → Enable <strong>Maps JavaScript API</strong> + <strong>Places API</strong></span>
+          </div>
+          <div class="lp-step">
+            <span class="lp-step-num">3</span>
+            <span>Create an API Key → Copy it</span>
+          </div>
+          <div class="lp-step">
+            <span class="lp-step-num">4</span>
+            <span>In Vercel dashboard → <strong>Settings → Environment Variables</strong><br>
+            Add: <code>GOOGLE_MAPS_API_KEY</code> = <em>your key</em></span>
+          </div>
+          <div class="lp-step">
+            <span class="lp-step-num">5</span>
+            <span>Redeploy on Vercel → Map works! 🎉</span>
+          </div>
+        </div>
+        <p class="lp-nokey-free">💡 Google Maps gives <strong>$200 free credit/month</strong> — enough for a portfolio project at no cost.</p>
+      </div>
+    `;
+  }
+
+  // ── Close Modal ─────────────────────────────────────────────────────────
   function close() {
     const overlay = document.getElementById('lp-modal-overlay');
     if (!overlay) return;
-
     overlay.classList.remove('lp-modal-show');
     overlay.classList.add('lp-modal-hide');
-    isOpen = false;
-
     setTimeout(() => {
       overlay.style.display = 'none';
       overlay.classList.remove('lp-modal-hide');
     }, 300);
-
-    document.removeEventListener('click', onOutsideClick, true);
   }
 
-  function onOutsideClick(e) {
-    const list = document.getElementById('lp-suggestions-list');
-    const input = document.getElementById('lp-search-input');
-    if (list && !list.contains(e.target) && e.target !== input) {
-      list.style.display = 'none';
-    }
+  // ── Inject Google Autocomplete Dropdown Styles ──────────────────────────
+  function injectAutocompleteStyles() {
+    if (document.getElementById('gm-autocomplete-style')) return;
+    const style = document.createElement('style');
+    style.id = 'gm-autocomplete-style';
+    style.textContent = `
+      .pac-container {
+        background: rgba(10,14,30,0.98) !important;
+        border: 1px solid rgba(79,142,255,0.3) !important;
+        border-top: none !important;
+        border-radius: 0 0 12px 12px !important;
+        box-shadow: 0 16px 50px rgba(0,0,0,0.7) !important;
+        z-index: 99999 !important;
+        font-family: 'Inter', sans-serif !important;
+      }
+      .pac-item {
+        background: transparent !important;
+        border-top: 1px solid rgba(255,255,255,0.05) !important;
+        color: #a0b0d0 !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        transition: background 0.15s !important;
+      }
+      .pac-item:hover, .pac-item-selected {
+        background: rgba(79,142,255,0.1) !important;
+      }
+      .pac-item-query {
+        color: #e0e8ff !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+      }
+      .pac-icon { filter: invert(0.6) !important; }
+      .pac-matched { color: #f5c842 !important; font-weight: 700 !important; }
+    `;
+    document.head.appendChild(style);
   }
 
-  // ─── Helpers ───
+  // ── Helpers ─────────────────────────────────────────────────────────────
   function setInfoText(text) {
     const el = document.getElementById('lp-info-text');
     if (el) el.textContent = text;
+  }
+
+  function enableConfirm(yes) {
+    const btn = document.getElementById('lp-confirm-btn');
+    if (btn) btn.disabled = !yes;
   }
 
   function setValue(id, val) {
@@ -409,30 +560,15 @@ const LocationPicker = (() => {
     return str && str.length > len ? str.slice(0, len) + '…' : str;
   }
 
-  function escapeJs(str) {
-    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  function showToast(msg, type) {
+    if (typeof UI !== 'undefined' && UI.showToast) UI.showToast(msg, type);
   }
 
-  function highlightMatch(text) {
-    const input = document.getElementById('lp-search-input');
-    if (!input || !input.value) return text;
-    const q = input.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return text.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>');
-  }
-
-  function showStatus(msg, type) {
-    if (typeof UI !== 'undefined' && UI.showToast) {
-      UI.showToast(msg, type);
-    }
-  }
-
-  // ─── Public API ───
+  // ── Public API ───────────────────────────────────────────────────────────
   return {
     open,
     close,
     useMyLocation,
-    onSearchInput,
-    selectSuggestion,
     selectMarker,
     confirmLocation,
     getSelectedData: () => window._lpAddressData || null,

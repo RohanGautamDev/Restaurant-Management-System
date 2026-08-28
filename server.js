@@ -31,6 +31,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Public config endpoint — serves non-secret client config
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleMapsKey: process.env.GOOGLE_MAPS_API_KEY || ''
+  });
+});
+
 // Serve static assets (CSS, JS, images)
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
