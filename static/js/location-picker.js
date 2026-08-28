@@ -22,6 +22,12 @@ const LocationPicker = (() => {
   let selectedEmoji = '🍽️';
   let searchTimer = null;
   let isGeocoding = false;
+  let currentSuggestions = []; // Local store for suggestions to prevent string escaping bugs
+
+  // Layers for satellite view feature
+  let streetLayer = null;
+  let satelliteLayer = null;
+  let currentLayerName = 'street';
 
   const NOMINATIM = 'https://nominatim.openstreetmap.org';
 
@@ -49,20 +55,25 @@ const LocationPicker = (() => {
     const el = document.getElementById('lp-map');
     if (!el) return;
 
+    // Define layers
+    streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+    });
+
+    satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
     // CRITICAL: The div already has height:360px via inline style in HTML.
-    // Leaflet needs this before L.map() is called.
     map = L.map('lp-map', {
       center: [20.5937, 78.9629], // India center
       zoom: 5,
       zoomControl: true,
       scrollWheelZoom: true,
+      layers: [streetLayer] // Default to Street layer
     });
-
-    // OpenStreetMap tiles (free, no key needed)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
 
     // Click on map → drop/move marker + reverse geocode
     map.on('click', (e) => {
@@ -74,7 +85,30 @@ const LocationPicker = (() => {
     if (input) {
       input.oninput = (e) => onSearch(e.target.value);
       input.onkeydown = (e) => {
-        if (e.key === 'Escape') closeDropdown();
+        if (e.key === 'Escape') {
+          closeDropdown();
+        } else if (e.key === 'Enter') {
+          e.preventDefault(); // Stop form submission
+          clearTimeout(searchTimer);
+          if (e.target.value.trim().length >= 3) {
+            fetchSuggestions(e.target.value.trim());
+          }
+        }
+      };
+    }
+
+    // Dropdown list event delegation (completely prevents quote escaping bugs)
+    const dd = document.getElementById('lp-dropdown');
+    if (dd) {
+      dd.onclick = (e) => {
+        const item = e.target.closest('.lp-dd-item');
+        if (item) {
+          const idx = parseInt(item.getAttribute('data-index'), 10);
+          const suggestion = currentSuggestions[idx];
+          if (suggestion) {
+            _selectResult(parseFloat(suggestion.lat), parseFloat(suggestion.lon), suggestion.display_name);
+          }
+        }
       };
     }
 
@@ -83,6 +117,29 @@ const LocationPicker = (() => {
       const section = document.getElementById('lp-search-section');
       if (section && !section.contains(e.target)) closeDropdown();
     }, true);
+  }
+
+  // ── Toggle Satellite View Layer ───────────────────────────────────────
+  function toggleLayer() {
+    if (!map) return;
+    const btn = document.getElementById('lp-layer-toggle-btn');
+    if (currentLayerName === 'street') {
+      map.removeLayer(streetLayer);
+      satelliteLayer.addTo(map);
+      currentLayerName = 'satellite';
+      if (btn) {
+        btn.innerHTML = '🗺️ Map View';
+        btn.classList.add('active');
+      }
+    } else {
+      map.removeLayer(satelliteLayer);
+      streetLayer.addTo(map);
+      currentLayerName = 'street';
+      if (btn) {
+        btn.innerHTML = '🛰️ Satellite View';
+        btn.classList.remove('active');
+      }
+    }
   }
 
   // ── Place / Move Marker ────────────────────────────────────────────────
@@ -124,7 +181,7 @@ const LocationPicker = (() => {
 
     try {
       const res = await fetch(
-        `${NOMINATIM}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+        `${NOMINATIM}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&email=dinemind-ai@restaurant.com`,
         { headers: { 'Accept-Language': 'en' } }
       );
       const data = await res.json();
@@ -202,10 +259,11 @@ const LocationPicker = (() => {
   async function fetchSuggestions(query) {
     try {
       const res = await fetch(
-        `${NOMINATIM}/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6`,
+        `${NOMINATIM}/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&email=dinemind-ai@restaurant.com`,
         { headers: { 'Accept-Language': 'en' } }
       );
       const results = await res.json();
+      currentSuggestions = results; // Store for event delegation selection
       renderDropdown(results, query);
     } catch (e) {
       closeDropdown();
@@ -222,8 +280,8 @@ const LocationPicker = (() => {
       return;
     }
 
-    dd.innerHTML = results.map(r => `
-      <div class="lp-dd-item" onclick="LocationPicker._selectResult(${parseFloat(r.lat)},${parseFloat(r.lon)},\`${r.display_name.replace(/`/g, "'")}\`)">
+    dd.innerHTML = results.map((r, i) => `
+      <div class="lp-dd-item" data-index="${i}">
         <span class="lp-dd-pin">📍</span>
         <div class="lp-dd-text">
           <div class="lp-dd-name">${highlight(r.display_name, query)}</div>
@@ -503,6 +561,7 @@ const LocationPicker = (() => {
     useMyLocation,
     selectEmoji,
     confirmLocation,
+    toggleLayer,
     _selectResult,
     getLocationData: () => window._lpData || null,
   };

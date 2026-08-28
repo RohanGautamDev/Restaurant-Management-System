@@ -1170,6 +1170,45 @@ textarea.form-control {
   color: #7eb8ff !important;
 }
 
+/* Satellite View Toggle Button overlay */
+.lp-layer-toggle-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(10, 14, 30, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(79, 142, 255, 0.35);
+  border-radius: 8px;
+  color: #7eb8ff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  font-family: inherit;
+}
+
+.lp-layer-toggle-btn:hover {
+  background: rgba(79, 142, 255, 0.15);
+  border-color: rgba(245, 200, 66, 0.8);
+  color: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 200, 66, 0.25);
+}
+
+.lp-layer-toggle-btn.active {
+  background: rgba(245, 200, 66, 0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+
 /* ─── Custom Map Pin ─── */
 .lp-pin-wrap {
   position: relative;

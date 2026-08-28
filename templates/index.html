@@ -1332,8 +1332,12 @@
       </div>
 
       <!-- MAP — inline height is KEY; flex-based height caused the blank map bug -->
-      <div class="lp-map-shell">
+      <div class="lp-map-shell" style="position:relative;">
         <div id="lp-map" style="height:360px;width:100%;"></div>
+        <!-- Satellite View Switcher -->
+        <button type="button" class="lp-layer-toggle-btn" id="lp-layer-toggle-btn" onclick="LocationPicker.toggleLayer()">
+          🛰️ Satellite View
+        </button>
       </div>
 
       <!-- Emoji Marker Selector -->
