@@ -1,3 +1,7 @@
+
+
+
+
 /**
  * DineMind AI — Location Picker
  * OpenStreetMap + Leaflet.js + Nominatim (100% free, no API key)
@@ -36,7 +40,7 @@ const LocationPicker = (() => {
     return L.divIcon({
       className: '',
       html: `<div class="lp-pin-wrap">
-               <div class="lp-pin-body">${emoji}</div>
+               <div class="lp-pin-body" data-emoji="${emoji}"></div>
                <div class="lp-pin-shadow"></div>
              </div>`,
       iconSize: [52, 64],
