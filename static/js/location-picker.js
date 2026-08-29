@@ -505,57 +505,15 @@ const LocationPicker = (() => {
       ].filter(Boolean).join('');
     }
 
-    setTimeout(() => initMiniMap(lat, lng), 150);
-
-    close();
     toast('📍 Restaurant location saved successfully!', 'success');
   }
 
-  // ── Mini Preview Map ───────────────────────────────────────────────────
-  function initMiniMap(lat, lng) {
-    const container = document.getElementById('lp-mini-map-box');
-    if (!container || container._miniMapInit) return;
-    container._miniMapInit = true;
-
-    const M = getMappls();
-    if (!M || !M.Map) return;
-
-    try {
-      container.innerHTML = '';
-      miniMap = new M.Map(container, {
-        center: [lat, lng],
-        zoom: 15,
-        zoomControl: false,
-        draggable: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-      });
-
-      new M.Marker({
-        map: miniMap,
-        position: { lat, lng },
-        draggable: false,
-      });
-    } catch (e) {
-      console.log('Mini map initialized');
-    }
-  }
-
-  // ── Open / Close Modal ─────────────────────────────────────────────────
+  // ── Open / Close Helpers (No-op as map is embedded directly in Hero Card) ──
   function open() {
-    const overlay = document.getElementById('lp-modal-overlay');
-    if (!overlay) return;
-    overlay.style.display = 'flex';
-
-    setTimeout(() => {
-      initMap();
-    }, 100);
+    initMap();
   }
 
   function close() {
-    const overlay = document.getElementById('lp-modal-overlay');
-    if (!overlay) return;
-    overlay.style.display = 'none';
     closeDropdown();
   }
 
@@ -584,13 +542,24 @@ const LocationPicker = (() => {
     if (typeof UI !== 'undefined' && UI.showToast) UI.showToast(msg, type);
   }
 
-  // Ensure window.mappls is accessible globally if loaded
+  // Auto initialize single Mappls Map on DOM load
   if (typeof window !== 'undefined') {
     getMappls();
+    const startMap = () => {
+      if (document.getElementById('lp-map')) {
+        setTimeout(initMap, 100);
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startMap);
+    } else {
+      startMap();
+    }
   }
 
   // ── Public API ─────────────────────────────────────────────────────────
   return {
+    initMap,
     open,
     close,
     quickGPS,

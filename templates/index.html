@@ -96,50 +96,72 @@
       </div>
 
       <!-- ═══════════════════════════════════════════════
-           SECTION 1: HERO LOCATION CARD (Top Primary Visual Anchor)
+           SECTION 1: HERO LOCATION CARD (Single Integrated Location Picker)
            ════════════════════════════════════════════════ -->
       <div class="saas-hero-card">
         <div class="saas-hero-header">
           <div class="saas-hero-icon">📍</div>
           <div>
             <h2 class="saas-hero-title">Set Your Restaurant Location</h2>
-            <p class="saas-hero-subtitle">Choose your restaurant location first so customers can easily find you.</p>
+            <p class="saas-hero-subtitle">Search, use GPS, or click the live Mappls map below to pin your location.</p>
           </div>
         </div>
 
-        <!-- Map Picker Trigger Frame -->
-        <div class="saas-map-frame">
-          <div class="lp-map-trigger saas-map-trigger" onclick="LocationPicker.open()">
-            <span class="saas-map-icon">🗺️</span>
-            <div class="saas-map-text">
-              <span class="saas-map-main">Click to Open Mappls Interactive Map</span>
-              <span class="saas-map-sub">Pin location, search address, or auto-detect GPS</span>
-            </div>
-            <span class="saas-map-arrow">›</span>
+        <!-- Search + GPS row — dropdown INSIDE this div for correct absolute positioning -->
+        <div class="lp-search-section" id="lp-search-section">
+          <div class="lp-search-row">
+            <span class="lp-srch-icon">🔍</span>
+            <input type="text" id="lp-search-input" class="lp-srch-input"
+              placeholder="Search address, area, city, landmark..." autocomplete="off"/>
+            <button type="button" class="lp-gps-pill" onclick="LocationPicker.useMyLocation()">
+              <span class="lp-gps-dot"></span>
+              🛰️ GPS
+            </button>
           </div>
-
-          <!-- GPS Current Location Hero Button -->
-          <button type="button" class="lp-gps-hero-btn saas-gps-btn" id="lp-gps-hero-btn" onclick="LocationPicker.quickGPS()">
-            <span class="lp-gps-pulse-ring"></span>
-            📍 Use My Current Location
-          </button>
+          <div class="lp-dropdown" id="lp-dropdown" style="display:none;"></div>
         </div>
 
-        <!-- Real-Time Selected Location Preview Card -->
-        <div class="lp-signup-preview saas-location-preview" id="lp-signup-preview" style="display:none;">
-          <div class="lp-mini-map-box saas-mini-map" id="lp-mini-map-box"></div>
-          <div class="lp-signup-preview-body saas-preview-body">
-            <div class="lp-signup-preview-top saas-preview-top">
-              <span class="lp-signup-preview-emoji saas-preview-emoji" id="lp-signup-preview-emoji">🍽️</span>
-              <div style="flex:1;min-width:0;">
-                <div class="lp-signup-preview-addr saas-preview-addr" id="lp-signup-preview-addr">Loading...</div>
-                <div class="lp-signup-preview-coords saas-preview-coords" id="lp-signup-preview-coords"></div>
-              </div>
-              <button type="button" class="lp-signup-preview-edit saas-preview-edit-btn" onclick="LocationPicker.open()">✏️ Edit Location</button>
-            </div>
-            <div class="lp-signup-preview-chips saas-chips-row" id="lp-signup-preview-chips"></div>
-            <div class="lp-signup-preview-success saas-success-badge">✅ Restaurant location confirmed!</div>
+        <!-- GPS loading bar -->
+        <div class="lp-gps-bar" id="lp-gps-bar" style="display:none;">
+          <div class="lp-gps-bar-inner"></div>
+          <span>🛰️ Detecting your GPS location...</span>
+        </div>
+
+        <!-- Mappls Live Map Shell -->
+        <div class="lp-map-shell saas-map-shell" style="position:relative;margin-top:12px;">
+          <div id="lp-map" style="height:340px;width:100%;border-radius:14px;"></div>
+        </div>
+
+        <!-- Emoji Marker Selector -->
+        <div class="lp-emoji-row mt-12">
+          <span class="lp-emoji-label">Your icon:</span>
+          <div class="lp-emoji-list" id="lp-emoji-list">
+            <button type="button" class="lp-emoji-btn active" onclick="LocationPicker.selectEmoji(this,'🍽️')">🍽️</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'☕')">☕</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍕')">🍕</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍔')">🍔</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍜')">🍜</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥗')">🥗</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍣')">🍣</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🌮')">🌮</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍰')">🍰</button>
+            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥐')">🥐</button>
           </div>
+        </div>
+
+        <!-- Location Confirmed Card -->
+        <div class="lp-found" id="lp-found" style="display:none;margin-top:12px;">
+          <div class="lp-found-emoji" id="lp-found-emoji">🍽️</div>
+          <div class="lp-found-body">
+            <div class="lp-found-title">🎉 Restaurant location confirmed!</div>
+            <div class="lp-found-addr" id="lp-found-addr"></div>
+            <div class="lp-found-chips" id="lp-found-chips"></div>
+          </div>
+        </div>
+
+        <!-- Status footer -->
+        <div class="lp-footer-status mt-8" id="lp-footer-status">
+          📌 Click the map, search, or use GPS to set your location
         </div>
       </div>
 
@@ -1332,92 +1354,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://sdk.mappls.com/map/sdk/web?v=3.0&access_token=mdwallaqjppbxotocjucfjxjronwpotbclru"></script>
   <script src="/static/js/location-picker.js?v=2.1.0"></script>
-
-  <!-- ═══════════════════════════════════════════════
-       LOCATION PICKER MODAL (Mappls Web SDK)
-       ════════════════════════════════════════════════ -->
-  <div id="lp-modal-overlay" class="lp-modal-overlay" style="display:none;">
-    <div class="lp-modal">
-
-      <!-- Header -->
-      <div class="lp-hdr">
-        <div class="lp-hdr-left">
-          <div class="lp-hdr-pin">📍</div>
-          <div>
-            <div class="lp-hdr-title">Find Your Restaurant</div>
-            <div class="lp-hdr-sub">Search, use GPS, or click the map to pin your location</div>
-          </div>
-        </div>
-        <button class="lp-hdr-close" onclick="LocationPicker.close()">✕</button>
-      </div>
-
-      <!-- Search + GPS row — dropdown INSIDE this div for correct absolute positioning -->
-      <div class="lp-search-section" id="lp-search-section">
-        <div class="lp-search-row">
-          <span class="lp-srch-icon">🔍</span>
-          <input type="text" id="lp-search-input" class="lp-srch-input"
-            placeholder="Search address, area, city, landmark..." autocomplete="off"/>
-          <button class="lp-gps-pill" onclick="LocationPicker.useMyLocation()">
-            <span class="lp-gps-dot"></span>
-            🛰️ GPS
-          </button>
-        </div>
-        <div class="lp-dropdown" id="lp-dropdown" style="display:none;"></div>
-      </div>
-
-      <!-- GPS loading bar -->
-      <div class="lp-gps-bar" id="lp-gps-bar" style="display:none;">
-        <div class="lp-gps-bar-inner"></div>
-        <span>🛰️ Detecting your GPS location...</span>
-      </div>
-
-      <!-- MAP — inline height is KEY; flex-based height caused the blank map bug -->
-      <div class="lp-map-shell" style="position:relative;">
-        <div id="lp-map" style="height:360px;width:100%;"></div>
-      </div>
-
-      <!-- Emoji Marker Selector -->
-      <div class="lp-emoji-row">
-        <span class="lp-emoji-label">Your restaurant icon:</span>
-        <div class="lp-emoji-list" id="lp-emoji-list">
-          <button class="lp-emoji-btn active" onclick="LocationPicker.selectEmoji(this,'🍽️')">🍽️</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'☕')">☕</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍕')">🍕</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍔')">🍔</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍜')">🍜</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥗')">🥗</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍣')">🍣</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🌮')">🌮</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍰')">🍰</button>
-          <button class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥐')">🥐</button>
-        </div>
-      </div>
-
-      <!-- Discovery Card — animates in after location confirmed -->
-      <div class="lp-found" id="lp-found" style="display:none;">
-        <div class="lp-found-emoji" id="lp-found-emoji">🍽️</div>
-        <div class="lp-found-body">
-          <div class="lp-found-title">🎉 Perfect! Your restaurant location is confirmed.</div>
-          <div class="lp-found-addr" id="lp-found-addr"></div>
-          <div class="lp-found-chips" id="lp-found-chips"></div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="lp-footer">
-        <div class="lp-footer-status" id="lp-footer-status">
-          📌 Click the map, search, or use GPS to set your location
-        </div>
-        <div class="lp-footer-actions">
-          <button class="btn btn-glass" onclick="LocationPicker.close()">Cancel</button>
-          <button class="btn btn-gold" id="lp-confirm-btn" onclick="LocationPicker.confirmLocation()" disabled>
-            ✅ Confirm Location
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
 
 </body>
 </html>
