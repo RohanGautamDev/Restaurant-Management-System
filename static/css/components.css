@@ -615,7 +615,23 @@ textarea.form-control {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  background: radial-gradient(circle at center, rgba(13, 18, 38, 0.92) 0%, rgba(6, 9, 20, 0.98) 100%);
+  .gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(ellipse 90% 70% at 10% 5%, rgba(168, 224, 99, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 70% at 90% 95%, rgba(255, 122, 122, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60% at 50% 40%, rgba(9, 14, 36, 0.85) 0%, rgba(5, 8, 20, 0.98) 100%);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -627,56 +643,206 @@ textarea.form-control {
   pointer-events: none;
 }
 
-
 /* ═══════════════════════════════════════════════
    PREMIUM AI SAAS GATE & REGISTRATION REDESIGN
-   Inspired by Apple, Linear & Vercel Design Systems
+   Inspired by Apple, Linear, Vercel & Notion AI
    ════════════════════════════════════════════════ */
 
-/* Ambient Fluid Background Glow (Light Green #38ef7d, White #ffffff, Soft Coral Red #ff4d6d) */
+/* Ambient Fluid Background Layers (Light Green #A8E063, White #FFFFFF, Soft Coral Red #FF7A7A) */
 .saas-bg-glow {
-  position: absolute;
+  position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
 
+/* Soft Radial Light Behind Form */
+.saas-form-light {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(168, 224, 99, 0.07) 0%, rgba(255, 122, 122, 0.05) 45%, transparent 70%);
+  filter: blur(100px);
+  pointer-events: none;
+  animation: saasFormPulse 24s ease-in-out infinite alternate;
+}
+
+@keyframes saasFormPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -48%) scale(1.06); opacity: 1; }
+  100% { transform: translate(-50%, -52%) scale(0.96); opacity: 0.85; }
+}
+
+/* 6 Floating Blurred Color Blobs (Opacity 0.05 - 0.12) */
 .saas-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.22;
-  animation: saasFloat 16s ease-in-out infinite alternate;
+  filter: blur(95px);
+  will-change: transform;
+  pointer-events: none;
 }
 
 .saas-blob-1 {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, #38ef7d 0%, rgba(56, 239, 125, 0) 70%);
-  top: -120px;
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(circle, #A8E063 0%, rgba(168, 224, 99, 0) 70%);
+  top: -150px;
   left: -120px;
-  animation-duration: 14s;
+  opacity: 0.11;
+  animation: saasBlobDrift1 32s ease-in-out infinite alternate;
 }
 
 .saas-blob-2 {
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, #ff4d6d 0%, rgba(255, 77, 109, 0) 70%);
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, #FF7A7A 0%, rgba(255, 122, 122, 0) 70%);
   bottom: -160px;
-  right: -120px;
-  animation-duration: 18s;
+  right: -140px;
+  opacity: 0.10;
+  animation: saasBlobDrift2 36s ease-in-out infinite alternate;
 }
 
 .saas-blob-3 {
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, #FFFFFF 0%, rgba(255, 255, 255, 0) 70%);
+  top: 30%;
+  left: 55%;
+  opacity: 0.07;
+  animation: saasBlobDrift3 28s ease-in-out infinite alternate;
+}
+
+.saas-blob-4 {
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, #ffffff 0%, rgba(255, 255, 255, 0) 70%);
-  top: 35%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.10;
+  background: radial-gradient(circle, #A8E063 0%, rgba(168, 224, 99, 0) 70%);
+  bottom: 20%;
+  left: -80px;
+  opacity: 0.08;
+  animation: saasBlobDrift4 34s ease-in-out infinite alternate;
+}
+
+.saas-blob-5 {
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, #FF7A7A 0%, rgba(255, 122, 122, 0) 70%);
+  top: 15%;
+  right: 10%;
+  opacity: 0.09;
+  animation: saasBlobDrift5 30s ease-in-out infinite alternate;
+}
+
+.saas-blob-6 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, #FFFFFF 0%, rgba(255, 255, 255, 0) 70%);
+  bottom: 10%;
+  left: 42%;
+  opacity: 0.06;
+  animation: saasBlobDrift6 26s ease-in-out infinite alternate;
+}
+
+@keyframes saasBlobDrift1 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(45px, -30px) rotate(10deg); }
+  100% { transform: translate(-30px, 35px) rotate(-8deg); }
+}
+
+@keyframes saasBlobDrift2 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-50px, 40px) rotate(-12deg); }
+  100% { transform: translate(35px, -25px) rotate(8deg); }
+}
+
+@keyframes saasBlobDrift3 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-35px, -45px) scale(1.1); }
+  100% { transform: translate(40px, 20px) scale(0.92); }
+}
+
+@keyframes saasBlobDrift4 {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(40px, 30px); }
+  100% { transform: translate(-25px, -40px); }
+}
+
+@keyframes saasBlobDrift5 {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, -35px); }
+  100% { transform: translate(35px, 25px); }
+}
+
+@keyframes saasBlobDrift6 {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(25px, -25px); }
+  100% { transform: translate(-20px, 30px); }
+}
+
+/* Floating Micro Glowing Particle Dots */
+.saas-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  animation: saasParticleFloat 18s ease-in-out infinite alternate;
+}
+
+.saas-particle-1 {
+  width: 4px; height: 4px;
+  background: #A8E063;
+  top: 18%; left: 22%;
+  opacity: 0.35;
+  animation-duration: 20s;
+}
+
+.saas-particle-2 {
+  width: 5px; height: 5px;
+  background: #FF7A7A;
+  top: 75%; left: 80%;
+  opacity: 0.3;
+  animation-duration: 24s;
+}
+
+.saas-particle-3 {
+  width: 3px; height: 3px;
+  background: #FFFFFF;
+  top: 40%; left: 85%;
+  opacity: 0.4;
+  animation-duration: 16s;
+}
+
+.saas-particle-4 {
+  width: 4px; height: 4px;
+  background: #A8E063;
+  top: 82%; left: 15%;
+  opacity: 0.25;
   animation-duration: 22s;
+}
+
+.saas-particle-5 {
+  width: 5px; height: 5px;
+  background: #FF7A7A;
+  top: 25%; left: 72%;
+  opacity: 0.32;
+  animation-duration: 26s;
+}
+
+.saas-particle-6 {
+  width: 3px; height: 3px;
+  background: #FFFFFF;
+  top: 60%; left: 10%;
+  opacity: 0.38;
+  animation-duration: 19s;
+}
+
+@keyframes saasParticleFloat {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-30px) translateX(20px); }
+  100% { transform: translateY(20px) translateX(-15px); }
 }
 
 @keyframes saasFloat {

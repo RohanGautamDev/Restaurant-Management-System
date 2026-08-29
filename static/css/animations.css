@@ -15,23 +15,23 @@
   overflow: hidden;
 }
 
-/* Fluid Gradient Mesh */
+/* Fluid Gradient Mesh (AI SaaS Palette: Light Green #A8E063, Soft Coral Red #FF7A7A, White #FFFFFF) */
 .bg-mesh {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 90% 70% at 15% 5%,  rgba(79,142,255,0.09) 0%,  transparent 60%),
-    radial-gradient(ellipse 70% 60% at 85% 95%, rgba(157,111,255,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,212,184,0.06) 0%,   transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(245,200,66,0.06) 0%,  transparent 50%);
-  animation: meshFluid 20s ease-in-out infinite alternate;
+    radial-gradient(ellipse 90% 70% at 15% 5%,  rgba(168,224,99,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 85% 95%, rgba(255,122,122,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(168,224,99,0.08) 0%, transparent 50%);
+  animation: meshFluid 28s ease-in-out infinite alternate;
 }
 
 @keyframes meshFluid {
   0%   { transform: scale(1) translate(0, 0); }
-  33%  { transform: scale(1.06) translate(20px, -15px); }
-  66%  { transform: scale(0.96) translate(-15px, 20px); }
-  100% { transform: scale(1.03) translate(10px, 10px); }
+  33%  { transform: scale(1.08) translate(25px, -20px); }
+  66%  { transform: scale(0.95) translate(-20px, 25px); }
+  100% { transform: scale(1.04) translate(15px, 15px); }
 }
 
 /* Grid Overlay with Radial Mask */
@@ -39,25 +39,25 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(79,142,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(79,142,255,0.035) 1px, transparent 1px);
-  background-size: 52px 52px;
+    linear-gradient(rgba(168,224,99,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,224,99,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
 }
 
-/* Fluid Floating Glowing Orbs */
+/* Fluid Floating Glowing Orbs (Light Green #A8E063 & Soft Coral Red #FF7A7A) */
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(90px);
   opacity: 0;
-  animation: orbAppear 2s ease forwards, orbLiquidFloat var(--d, 22s) cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  animation: orbAppear 2s ease forwards, orbLiquidFloat var(--d, 28s) cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
   animation-delay: var(--delay, 0s), var(--delay, 0s);
   will-change: transform;
 }
 
 @keyframes orbAppear {
-  to { opacity: var(--op, 0.45); }
+  to { opacity: var(--op, 0.10); }
 }
 
 @keyframes orbLiquidFloat {
@@ -70,41 +70,41 @@
 
 .orb-1 {
   width: 650px; height: 650px;
-  background: radial-gradient(circle, rgba(79,142,255,0.6), transparent 70%);
+  background: radial-gradient(circle, rgba(168,224,99,0.11), transparent 70%);
   top: -15%; left: -10%;
-  --d: 22s; --op: 0.4; --delay: 0.2s;
+  --d: 32s; --op: 0.10; --delay: 0.2s;
   --tx1: 60px; --ty1: -45px; --tx2: -40px; --ty2: 70px;
   --tx3: 50px; --ty3: 25px; --tx4: -25px; --ty4: -55px;
 }
 .orb-2 {
   width: 550px; height: 550px;
-  background: radial-gradient(circle, rgba(157,111,255,0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(255,122,122,0.10), transparent 70%);
   top: 20%; right: -12%;
-  --d: 28s; --op: 0.35; --delay: 0.6s;
+  --d: 36s; --op: 0.09; --delay: 0.6s;
   --tx1: -70px; --ty1: 35px; --tx2: 30px; --ty2: -80px;
   --tx3: -45px; --ty3: 60px; --tx4: 35px; --ty4: -25px;
 }
 .orb-3 {
   width: 460px; height: 460px;
-  background: radial-gradient(circle, rgba(0,212,184,0.5), transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);
   bottom: -8%; left: 20%;
-  --d: 25s; --op: 0.32; --delay: 1s;
+  --d: 30s; --op: 0.07; --delay: 1s;
   --tx1: 35px; --ty1: 55px; --tx2: -60px; --ty2: -35px;
   --tx3: 25px; --ty3: -70px; --tx4: -35px; --ty4: 45px;
 }
 .orb-4 {
   width: 340px; height: 340px;
-  background: radial-gradient(circle, rgba(245,200,66,0.42), transparent 70%);
+  background: radial-gradient(circle, rgba(168,224,99,0.09), transparent 70%);
   top: 50%; left: 52%;
-  --d: 19s; --op: 0.3; --delay: 1.4s;
+  --d: 26s; --op: 0.08; --delay: 1.4s;
   --tx1: -45px; --ty1: -35px; --tx2: 70px; --ty2: 25px;
   --tx3: -25px; --ty3: 55px; --tx4: 35px; --ty4: -45px;
 }
 .orb-5 {
   width: 380px; height: 380px;
-  background: radial-gradient(circle, rgba(255,92,138,0.38), transparent 70%);
+  background: radial-gradient(circle, rgba(255,122,122,0.08), transparent 70%);
   bottom: 12%; right: 16%;
-  --d: 32s; --op: 0.28; --delay: 0.5s;
+  --d: 38s; --op: 0.08; --delay: 0.5s;
   --tx1: 55px; --ty1: -55px; --tx2: -35px; --ty2: 35px;
   --tx3: 45px; --ty3: 65px; --tx4: -55px; --ty4: -25px;
 }
