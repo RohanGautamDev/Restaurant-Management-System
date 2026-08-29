@@ -27,7 +27,6 @@ const LocationPicker = (() => {
   let searchTimer = null;
   let isGeocoding = false;
   let currentSuggestions = [];
-  let currentLayerType = 'vector'; // vector or hybrid/satellite
   let mapplsApiKey = 'mdwallaqjppbxotocjucfjxjronwpotbclru';
 
   // ── Ensure window.mappls is accessible ─────────────────────────────────
@@ -196,11 +195,6 @@ const LocationPicker = (() => {
         if (section && !section.contains(e.target)) closeDropdown();
       }, true);
     }
-  }
-
-  // ── Toggle Satellite / Vector Layer (Temporarily Disabled) ───────────────
-  function toggleLayer() {
-    toast('ℹ️ Satellite View is temporarily disabled.', 'info');
   }
 
   // ── Place / Move Mappls Marker ─────────────────────────────────────────
@@ -603,7 +597,6 @@ const LocationPicker = (() => {
     useMyLocation,
     selectEmoji,
     confirmLocation,
-    toggleLayer,
     getLocationData: () => window._lpData || null,
   };
 
