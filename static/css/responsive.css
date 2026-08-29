@@ -213,6 +213,35 @@ body {
     height: 90px !important;
   }
 
+  /* 2-Column Hero Section Banner Mobile Stacking */
+  .saas-hero-banner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .saas-hero-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .saas-main-title {
+    font-size: 1.75rem;
+  }
+
+  .saas-main-desc {
+    max-width: 100%;
+  }
+
+  .saas-hero-chips {
+    justify-content: center;
+  }
+
+  .saas-bbq-wrap {
+    width: 220px;
+    height: 220px;
+  }
+
   /* KPI: 2 columns on tablet */
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);

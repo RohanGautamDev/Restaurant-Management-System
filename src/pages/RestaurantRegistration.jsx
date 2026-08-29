@@ -95,13 +95,28 @@ const RestaurantRegistration = ({ onRegisterSuccess }) => {
   return (
     <div className="registration-page-wrapper">
       <div className="registration-card">
-        <div className="registration-header">
-          <div className="edge-pinwheel-wrap" style={{ width: '120px', height: '120px', margin: '0 auto 12px', display: 'block' }}>
-            <div className="edge-pinwheel-glow" style={{ inset: '-12px', opacity: 0.9 }}></div>
-            <img src="/static/images/bbq-grill.png" className="bbq-rotate" alt="BBQ Grill" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%', display: 'block' }} />
+        {/* 2-Column Hero Section Banner */}
+        <div className="saas-hero-banner">
+          <div className="saas-hero-left">
+            <div className="saas-brand-tag">✨ DineMind AI Platform</div>
+            <h1 className="saas-main-title">Simplify &amp; Scale Restaurant Operations</h1>
+            <p className="saas-main-desc">
+              Add your restaurant profile, configure table layouts, and automate POS, kitchen KDS &amp; smart inventory with Mappls geocoding precision.
+            </p>
+            <div className="saas-hero-chips">
+              <span className="saas-hero-chip">⚡ Mappls Geocoding</span>
+              <span className="saas-hero-chip">📊 Smart POS</span>
+              <span className="saas-hero-chip">👨‍🍳 Live Kitchen KDS</span>
+              <span className="saas-hero-chip">📦 Auto Inventory</span>
+            </div>
           </div>
-          <h1 className="registration-title">DineMind AI</h1>
-          <p className="registration-subtitle">Onboard Your Restaurant with Mappls Smart Geocoding</p>
+
+          <div className="saas-hero-right">
+            <div className="edge-pinwheel-wrap saas-bbq-wrap">
+              <div className="edge-pinwheel-glow saas-bbq-glow"></div>
+              <img src="/static/images/bbq-grill.png" className="bbq-rotate saas-bbq-img" alt="BBQ Grill" />
+            </div>
+          </div>
         </div>
 
         {statusMessage && (
