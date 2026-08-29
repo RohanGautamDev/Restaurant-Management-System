@@ -96,73 +96,94 @@
       </div>
 
       <!-- ═══════════════════════════════════════════════
-           SECTION 1: HERO LOCATION CARD (Single Integrated Location Picker)
+           SECTION 1: HERO LOCATION CARD (Collapsible Single Location Picker)
            ════════════════════════════════════════════════ -->
-      <div class="saas-hero-card">
+      <div class="saas-hero-card" id="saas-hero-card">
+        <!-- Hero Header -->
         <div class="saas-hero-header">
           <div class="saas-hero-icon">📍</div>
-          <div>
+          <div style="flex:1;min-width:0;">
             <h2 class="saas-hero-title">Set Your Restaurant Location</h2>
-            <p class="saas-hero-subtitle">Search, use GPS, or click the live Mappls map below to pin your location.</p>
+            <p class="saas-hero-subtitle" id="saas-hero-sub">Search, use GPS, or click the live Mappls map below to pin your location.</p>
+          </div>
+          <button type="button" class="saas-edit-location-btn" id="saas-edit-location-btn" onclick="LocationPicker.expand()" style="display:none;">
+            ✏️ Edit Location
+          </button>
+        </div>
+
+        <!-- COLLAPSED SUMMARY VIEW (Shown when location is selected/confirmed) -->
+        <div class="saas-hero-collapsed" id="saas-hero-collapsed" style="display:none;">
+          <div class="saas-summary-box">
+            <span class="saas-summary-emoji" id="lp-preview-emoji">🍽️</span>
+            <div style="flex:1;min-width:0;">
+              <div class="saas-summary-title">🎉 Restaurant Location Confirmed</div>
+              <div class="saas-summary-addr" id="lp-preview-addr">Connecting location...</div>
+              <div class="saas-summary-coords" id="lp-preview-coords"></div>
+            </div>
+          </div>
+          <div class="saas-summary-chips" id="lp-preview-chips"></div>
+        </div>
+
+        <!-- EXPANDED INTERACTIVE VIEW (Interactive Mappls Map, Search, GPS, Marker) -->
+        <div class="saas-hero-expanded" id="saas-hero-expanded">
+          <!-- Search + GPS row — dropdown INSIDE this div for correct absolute positioning -->
+          <div class="lp-search-section" id="lp-search-section">
+            <div class="lp-search-row">
+              <span class="lp-srch-icon">🔍</span>
+              <input type="text" id="lp-search-input" class="lp-srch-input"
+                placeholder="Search address, area, city, landmark..." autocomplete="off"/>
+              <button type="button" class="lp-gps-pill" onclick="LocationPicker.useMyLocation()">
+                <span class="lp-gps-dot"></span>
+                🛰️ GPS
+              </button>
+            </div>
+            <div class="lp-dropdown" id="lp-dropdown" style="display:none;"></div>
+          </div>
+
+          <!-- GPS loading bar -->
+          <div class="lp-gps-bar" id="lp-gps-bar" style="display:none;">
+            <div class="lp-gps-bar-inner"></div>
+            <span>🛰️ Detecting your GPS location...</span>
+          </div>
+
+          <!-- Mappls Live Map Shell (SINGLE Map Instance Container) -->
+          <div class="lp-map-shell saas-map-shell" style="position:relative;margin-top:12px;">
+            <div id="lp-map" style="height:320px;width:100%;border-radius:14px;"></div>
+          </div>
+
+          <!-- Emoji Marker Selector -->
+          <div class="lp-emoji-row mt-12">
+            <span class="lp-emoji-label">Your icon:</span>
+            <div class="lp-emoji-list" id="lp-emoji-list">
+              <button type="button" class="lp-emoji-btn active" onclick="LocationPicker.selectEmoji(this,'🍽️')">🍽️</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'☕')">☕</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍕')">🍕</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍔')">🍔</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍜')">🍜</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥗')">🥗</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍣')">🍣</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🌮')">🌮</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍰')">🍰</button>
+              <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥐')">🥐</button>
+            </div>
+          </div>
+
+          <!-- Status footer & Actions Row -->
+          <div class="saas-expanded-actions mt-14">
+            <div class="lp-footer-status" id="lp-footer-status">
+              📌 Click the map, search, or use GPS to set your location
+            </div>
+            <div class="saas-action-buttons">
+              <button type="button" class="btn btn-glass btn-sm" id="lp-cancel-btn" onclick="LocationPicker.collapse()" style="display:none;">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-saas-gradient btn-sm" id="lp-confirm-btn" onclick="LocationPicker.confirmLocation()">
+                ✅ Confirm Location
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Search + GPS row — dropdown INSIDE this div for correct absolute positioning -->
-        <div class="lp-search-section" id="lp-search-section">
-          <div class="lp-search-row">
-            <span class="lp-srch-icon">🔍</span>
-            <input type="text" id="lp-search-input" class="lp-srch-input"
-              placeholder="Search address, area, city, landmark..." autocomplete="off"/>
-            <button type="button" class="lp-gps-pill" onclick="LocationPicker.useMyLocation()">
-              <span class="lp-gps-dot"></span>
-              🛰️ GPS
-            </button>
-          </div>
-          <div class="lp-dropdown" id="lp-dropdown" style="display:none;"></div>
-        </div>
-
-        <!-- GPS loading bar -->
-        <div class="lp-gps-bar" id="lp-gps-bar" style="display:none;">
-          <div class="lp-gps-bar-inner"></div>
-          <span>🛰️ Detecting your GPS location...</span>
-        </div>
-
-        <!-- Mappls Live Map Shell -->
-        <div class="lp-map-shell saas-map-shell" style="position:relative;margin-top:12px;">
-          <div id="lp-map" style="height:340px;width:100%;border-radius:14px;"></div>
-        </div>
-
-        <!-- Emoji Marker Selector -->
-        <div class="lp-emoji-row mt-12">
-          <span class="lp-emoji-label">Your icon:</span>
-          <div class="lp-emoji-list" id="lp-emoji-list">
-            <button type="button" class="lp-emoji-btn active" onclick="LocationPicker.selectEmoji(this,'🍽️')">🍽️</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'☕')">☕</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍕')">🍕</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍔')">🍔</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍜')">🍜</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥗')">🥗</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍣')">🍣</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🌮')">🌮</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🍰')">🍰</button>
-            <button type="button" class="lp-emoji-btn" onclick="LocationPicker.selectEmoji(this,'🥐')">🥐</button>
-          </div>
-        </div>
-
-        <!-- Location Confirmed Card -->
-        <div class="lp-found" id="lp-found" style="display:none;margin-top:12px;">
-          <div class="lp-found-emoji" id="lp-found-emoji">🍽️</div>
-          <div class="lp-found-body">
-            <div class="lp-found-title">🎉 Restaurant location confirmed!</div>
-            <div class="lp-found-addr" id="lp-found-addr"></div>
-            <div class="lp-found-chips" id="lp-found-chips"></div>
-          </div>
-        </div>
-
-        <!-- Status footer -->
-        <div class="lp-footer-status mt-8" id="lp-footer-status">
-          📌 Click the map, search, or use GPS to set your location
-        </div>
       </div>
 
       <!-- ═══════════════════════════════════════════════

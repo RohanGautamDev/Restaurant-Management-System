@@ -477,44 +477,81 @@ const LocationPicker = (() => {
     setVal('signup-lng', lng);
     setVal('signup-formatted-address', addr);
     setVal('signup-city', d.city || '');
+    setVal('signup-lat', lat);
+    setVal('signup-lng', lng);
+    setVal('signup-formatted-address', addr);
+    setVal('signup-city', d.city || '');
     setVal('signup-country', d.country || 'India');
     setVal('signup-marker-emoji', selectedEmoji);
 
-    const preview = document.getElementById('lp-signup-preview');
-    const heroBtn = document.getElementById('lp-gps-hero-btn');
-    const mapTrig = document.querySelector('.lp-map-trigger');
+    // Update Collapsed Summary Preview Chips
+    const pEmoji = document.getElementById('lp-preview-emoji');
+    const pAddr = document.getElementById('lp-preview-addr');
+    const pCoords = document.getElementById('lp-preview-coords');
+    const pChips = document.getElementById('lp-preview-chips');
 
-    if (preview) preview.style.display = 'block';
-    if (heroBtn) heroBtn.style.display = 'none';
-    if (mapTrig) mapTrig.style.display = 'none';
-
-    const eEl = document.getElementById('lp-signup-preview-emoji');
-    const aEl = document.getElementById('lp-signup-preview-addr');
-    const cEl = document.getElementById('lp-signup-preview-coords');
-    const chEl = document.getElementById('lp-signup-preview-chips');
-
-    if (eEl) eEl.textContent = selectedEmoji;
-    if (aEl) aEl.textContent = addr;
-    if (cEl) cEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    if (chEl) {
-      chEl.innerHTML = [
-        d.city && `<span class="lp-chip">${d.city}</span>`,
-        d.state && `<span class="lp-chip">${d.state}</span>`,
-        d.country && `<span class="lp-chip">${d.country}</span>`,
+    if (pEmoji) pEmoji.textContent = selectedEmoji;
+    if (pAddr) pAddr.textContent = addr;
+    if (pCoords) pCoords.textContent = `📍 Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+    if (pChips) {
+      pChips.innerHTML = [
+        d.city && `<span class="lp-chip">🏙️ ${d.city}</span>`,
+        d.state && `<span class="lp-chip">🗺️ ${d.state}</span>`,
+        d.country && `<span class="lp-chip">🌍 ${d.country}</span>`,
         d.postcode && `<span class="lp-chip">📮 ${d.postcode}</span>`,
       ].filter(Boolean).join('');
     }
 
-    toast('📍 Restaurant location saved successfully!', 'success');
+    collapse();
+    toast('📍 Restaurant location confirmed successfully!', 'success');
   }
 
-  // ── Open / Close Helpers (No-op as map is embedded directly in Hero Card) ──
+  // ── Hero Card Accordion Toggle (Expand / Collapse) ─────────────────────
+  function expand() {
+    const heroCard = document.getElementById('saas-hero-card');
+    const collapsedView = document.getElementById('saas-hero-collapsed');
+    const expandedView = document.getElementById('saas-hero-expanded');
+    const editBtn = document.getElementById('saas-edit-location-btn');
+    const cancelBtn = document.getElementById('lp-cancel-btn');
+
+    if (heroCard) heroCard.classList.add('is-expanded');
+    if (collapsedView) collapsedView.style.display = 'none';
+    if (expandedView) expandedView.style.display = 'block';
+    if (editBtn) editBtn.style.display = 'none';
+    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+
+    setTimeout(() => {
+      if (map && typeof map.resize === 'function') {
+        map.resize();
+      }
+    }, 150);
+  }
+
+  function collapse() {
+    const d = window._lpData;
+    if (!d || !d.lat) {
+      // If user hasn't selected location yet, leave expanded
+      return;
+    }
+
+    const heroCard = document.getElementById('saas-hero-card');
+    const collapsedView = document.getElementById('saas-hero-collapsed');
+    const expandedView = document.getElementById('saas-hero-expanded');
+    const editBtn = document.getElementById('saas-edit-location-btn');
+
+    if (heroCard) heroCard.classList.remove('is-expanded');
+    if (expandedView) expandedView.style.display = 'none';
+    if (collapsedView) collapsedView.style.display = 'block';
+    if (editBtn) editBtn.style.display = 'inline-flex';
+    closeDropdown();
+  }
+
   function open() {
-    initMap();
+    expand();
   }
 
   function close() {
-    closeDropdown();
+    collapse();
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────
@@ -560,6 +597,8 @@ const LocationPicker = (() => {
   // ── Public API ─────────────────────────────────────────────────────────
   return {
     initMap,
+    expand,
+    collapse,
     open,
     close,
     quickGPS,
