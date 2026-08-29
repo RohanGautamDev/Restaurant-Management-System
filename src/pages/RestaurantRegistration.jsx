@@ -96,6 +96,17 @@ const RestaurantRegistration = ({ onRegisterSuccess }) => {
     <div className="registration-page-wrapper">
       <div className="registration-card">
         <div className="registration-header">
+          <div className="edge-pinwheel-wrap" style={{ width: '64px', height: '64px', margin: '0 auto 12px', display: 'block' }}>
+            <div className="edge-pinwheel-glow" style={{ inset: '-10px', opacity: 0.9 }}></div>
+            <svg className="edge-pinwheel-svg bbq-rotate" viewBox="0 0 100 100">
+              <path d="M50,50 L50,6 A44,44 0 0,1 88.1,28 C70,35 55,45 50,50 Z" fill="#ff4d6d"/>
+              <path d="M50,50 L88.1,28 A44,44 0 0,1 88.1,72 C75,55 60,50 50,50 Z" fill="#ff9233"/>
+              <path d="M50,50 L88.1,72 A44,44 0 0,1 50,94 C50,75 50,58 50,50 Z" fill="#ffe135"/>
+              <path d="M50,50 L50,94 A44,44 0 0,1 11.9,72 C30,65 45,55 50,50 Z" fill="#38ef7d"/>
+              <path d="M50,50 L11.9,72 A44,44 0 0,1 11.9,28 C25,45 40,50 50,50 Z" fill="#00d2ff"/>
+              <path d="M50,50 L11.9,28 A44,44 0 0,1 50,6 C50,25 50,42 50,50 Z" fill="#8054ff"/>
+            </svg>
+          </div>
           <h1 className="registration-title">DineMind AI</h1>
           <p className="registration-subtitle">Onboard Your Restaurant with Mappls Smart Geocoding</p>
         </div>

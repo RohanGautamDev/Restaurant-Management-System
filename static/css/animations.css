@@ -284,6 +284,53 @@
   to   { transform: rotate(360deg); }
 }
 
+/* ─── Premium BBQ Grill Animation ─── */
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 12px rgba(255,120,0,.25));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 35px rgba(255,120,0,.55));
+  }
+
+  100% {
+    filter: drop-shadow(0 0 12px rgba(255,120,0,.25));
+  }
+}
+
+.bbq-rotate {
+  animation:
+    slow-spin 40s linear infinite,
+    floating 6s ease-in-out infinite,
+    glow 3s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
 /* ─── 9. Accessibility: Reduced Motion & Zero-Shift Cards ─── */
 .card-glass,
 .card-glass:hover,
