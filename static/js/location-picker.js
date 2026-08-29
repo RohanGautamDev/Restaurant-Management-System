@@ -198,63 +198,80 @@ const LocationPicker = (() => {
     }
   }
 
-  // ── Toggle Satellite / Vector Layer ────────────────────────────────────
+  // ── Toggle Satellite / Vector Layer (Official Mappls v3.0 API & Native Hybrid Parameter) ─────
   function toggleLayer() {
     if (!map) return;
     const btn = document.getElementById('lp-layer-toggle-btn');
     const M = getMappls();
 
-    const isVector = (currentLayerType === 'vector');
-    const targetLayer = isVector ? 'hybrid' : 'vector';
-    const targetStyle = isVector ? 'satellite' : 'standard';
+    const isCurrentlyVector = (currentLayerType === 'vector');
+    const newLayerType = isCurrentlyVector ? 'hybrid' : 'vector';
+    const isHybrid = (newLayerType === 'hybrid');
 
-    let switched = false;
+    let styleApplied = false;
 
-    // 1. Try map.setStyle (MapLibre / Mapbox style API)
-    if (typeof map.setStyle === 'function') {
+    // 1. Try official Mappls Web SDK v3.0 setStyle API ("standard-hybrid" or "hybrid")
+    if (M && typeof M.setStyle === 'function') {
       try {
-        map.setStyle(targetLayer);
-        switched = true;
+        M.setStyle(isHybrid ? 'standard-hybrid' : 'standard-day');
+        styleApplied = true;
       } catch (e) {
         try {
-          map.setStyle(targetStyle);
-          switched = true;
+          M.setStyle(isHybrid ? 'hybrid' : 'vector');
+          styleApplied = true;
         } catch (e2) {}
       }
     }
 
-    // 2. Try map.setLayer
-    if (!switched && typeof map.setLayer === 'function') {
+    if (!styleApplied && map && typeof map.setStyle === 'function') {
       try {
-        map.setLayer(targetLayer);
-        switched = true;
+        map.setStyle(isHybrid ? 'standard-hybrid' : 'standard-day');
+        styleApplied = true;
       } catch (e) {
         try {
-          map.setLayer(targetStyle);
-          switched = true;
+          map.setStyle(isHybrid ? 'hybrid' : 'vector');
+          styleApplied = true;
         } catch (e2) {}
       }
     }
 
-    // 3. Try M.setLayer / M.setStyle (Mappls global SDK API)
-    if (!switched && M) {
-      if (typeof M.setLayer === 'function') {
-        try {
-          M.setLayer(targetLayer);
-          switched = true;
-        } catch (e) {}
-      }
-      if (!switched && typeof M.setStyle === 'function') {
-        try {
-          M.setStyle(targetLayer);
-          switched = true;
-        } catch (e) {}
+    // 2. If runtime style API is unavailable, recreate Map using official `hybrid: true` parameter
+    if (!styleApplied && M && M.Map) {
+      try {
+        const savedLat = selectedLat;
+        const savedLng = selectedLng;
+        marker = null;
+
+        const mapEl = document.getElementById('lp-map');
+        if (mapEl) mapEl.innerHTML = '';
+
+        map = new M.Map('lp-map', {
+          center: [savedLat, savedLng],
+          zoom: 15,
+          zoomControl: true,
+          hybrid: isHybrid,
+          location: true,
+        });
+
+        map.addListener('click', (e) => {
+          if (e && e.lngLat) {
+            placeMarker(e.lngLat.lat, e.lngLat.lng, true);
+          }
+        });
+
+        map.on('load', () => {
+          placeMarker(savedLat, savedLng, false);
+        });
+
+        styleApplied = true;
+      } catch (err) {
+        console.warn('Error recreating Mappls map instance with hybrid mode:', err);
       }
     }
 
-    currentLayerType = targetLayer;
+    currentLayerType = newLayerType;
     if (btn) {
-      btn.innerHTML = (targetLayer === 'hybrid') ? '🗺️ Map View' : '🛰️ Satellite View';
+      btn.innerHTML = isHybrid ? '🗺️ Map View' : '🛰️ Satellite View';
     }
   }
 
