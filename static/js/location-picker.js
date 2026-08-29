@@ -103,7 +103,7 @@ const LocationPicker = (() => {
 
       const script = document.createElement('script');
       script.id = 'mappls-sdk-script';
-      script.src = `https://apis.mappls.com/advancedmaps/api/${mapplsApiKey}/map_sdk?layer=vector&v=3.0&libraries=search,geocode`;
+      script.src = `https://sdk.mappls.com/map/sdk/web?v=3.0&access_token=${mapplsApiKey}`;
       script.async = true;
       script.onload = () => {
         const sdk = getMappls();
