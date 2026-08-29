@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="/static/css/components.css?v=1.0.3">
   <link rel="stylesheet" href="/static/css/dashboard.css?v=1.0.3">
   <link rel="stylesheet" href="/static/css/responsive.css?v=1.0.3">
+
+  <!-- Leaflet.js CSS (Fallback engine support) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 </head>
 <body>
 
@@ -1286,9 +1289,10 @@
   <script src="/static/js/dashboard.js?v=1.0.3"></script>
   <script src="/static/js/app.js?v=1.0.3"></script>
 
-  <!-- Mappls (MapmyIndia) Official Web SDK v3.0 -->
+  <!-- Map Engines: Official Mappls Web SDK v3.0 with Leaflet.js Automatic Fallback -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://apis.mappls.com/advancedmaps/api/mdwallaqjppbxotocjucfjxjronwpotbclru/map_sdk?layer=vector&v=3.0&libraries=search,geocode"></script>
-  <script src="/static/js/location-picker.js?v=2.0.0"></script>
+  <script src="/static/js/location-picker.js?v=2.1.0"></script>
 
   <!-- ═══════════════════════════════════════════════
        LOCATION PICKER MODAL (Mappls Web SDK)
