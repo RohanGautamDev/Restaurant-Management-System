@@ -458,6 +458,31 @@ body {
     padding: 10px 14px;
     font-size: 0.83rem;
   }
+
+  /* AI SaaS Registration Layout Responsiveness */
+  .saas-gate-container {
+    max-width: 100%;
+    padding: 0 12px;
+    gap: 16px;
+  }
+  .saas-hero-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  .saas-form-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  .apple-segmented-chips {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .saas-hero-title {
+    font-size: 1.05rem;
+  }
+  .saas-hero-subtitle {
+    font-size: 0.78rem;
+  }
 }
 
 /* ══════════════════════════════════════════════════════

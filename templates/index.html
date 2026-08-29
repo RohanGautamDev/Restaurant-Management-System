@@ -43,13 +43,22 @@
 
 
   <!-- ═══════════════════════════════════════════════
-       FULL-SCREEN MOTION UI LOGIN LANDING GATE
+       FULL-SCREEN MOTION UI LOGIN LANDING GATE (AI SaaS Redesign)
        ════════════════════════════════════════════════ -->
   <div id="login-landing-screen" class="gate-overlay">
-    <div class="gate-card card-tilt">
-      <!-- Chromatic Pinwheel Header -->
+    <!-- Ambient Animated Gradient Background (Light Green, White, Soft Coral Red) -->
+    <div class="saas-bg-glow">
+      <div class="saas-blob saas-blob-1"></div>
+      <div class="saas-blob saas-blob-2"></div>
+      <div class="saas-blob saas-blob-3"></div>
+    </div>
+
+    <!-- Main SaaS visual container -->
+    <div class="saas-gate-container">
+      
+      <!-- Brand Header -->
       <div class="gate-header">
-        <div class="edge-pinwheel-wrap" style="width:72px;height:72px;margin:0 auto 16px;display:block;">
+        <div class="edge-pinwheel-wrap" style="width:64px;height:64px;margin:0 auto 12px;display:block;">
           <div class="edge-pinwheel-glow" style="inset:-10px;opacity:0.9;"></div>
           <svg class="edge-pinwheel-svg" viewBox="0 0 100 100">
             <path d="M50,50 L50,6 A44,44 0 0,1 88.1,28 C70,35 55,45 50,50 Z" fill="#ff4d6d"/>
@@ -64,137 +73,155 @@
         <p class="gate-subtitle">Smart Restaurant Operations Platform</p>
       </div>
 
-
-      <!-- 1-Click Demo Quick Selectors -->
-      <div class="gate-demo-box">
+      <!-- 1-Click Demo Quick Selectors (Apple Segmented Control Style) -->
+      <div class="apple-segmented-box">
         <div class="gate-demo-label">⚡ 1-Click Quick Demo Login</div>
-        <div class="gate-demo-chips">
-          <button type="button" class="demo-chip" onclick="App.fillGateDemo('admin')">👑 Admin (admin)</button>
-          <button type="button" class="demo-chip" onclick="App.fillGateDemo('manager')">📊 Manager (manager)</button>
-          <button type="button" class="demo-chip" onclick="App.fillGateDemo('staff')">👨‍🍳 Staff (staff)</button>
+        <div class="apple-segmented-chips">
+          <button type="button" class="apple-segmented-chip" onclick="App.fillGateDemo('admin')">👑 Admin</button>
+          <button type="button" class="apple-segmented-chip" onclick="App.fillGateDemo('manager')">📊 Manager</button>
+          <button type="button" class="apple-segmented-chip" onclick="App.fillGateDemo('staff')">👨‍🍳 Staff</button>
         </div>
       </div>
 
-      <!-- Sign In Form (Default Gate View) -->
-      <form id="gate-signin-form" onsubmit="App.handleGateSignIn(event)">
-        <div class="gate-form-group">
-          <label class="form-label">1st :- Username or Email *</label>
-          <input type="text" id="gate-username" class="form-control" placeholder="e.g. admin or manager@dinemind.ai" required autocomplete="username">
-        </div>
-
-        <div class="gate-form-group">
-          <label class="form-label">2nd :- Password *</label>
-          <div class="password-input-wrap">
-            <input type="password" id="gate-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
-            <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-password', this)">👁️</span>
+      <!-- ═══════════════════════════════════════════════
+           SECTION 1: HERO LOCATION CARD (Top Primary Visual Anchor)
+           ════════════════════════════════════════════════ -->
+      <div class="saas-hero-card">
+        <div class="saas-hero-header">
+          <div class="saas-hero-icon">📍</div>
+          <div>
+            <h2 class="saas-hero-title">Set Your Restaurant Location</h2>
+            <p class="saas-hero-subtitle">Choose your restaurant location first so customers can easily find you.</p>
           </div>
         </div>
 
-        <div class="gate-actions-row mt-16">
-          <button type="submit" class="btn btn-gold w-full" id="btn-gate-signin">
-            <span>🔑</span>
-            <span>Sign In to Operations Console</span>
-          </button>
-        </div>
-      </form>
-
-      <!-- Sign Up Form (Hidden Gate View) -->
-      <form id="gate-signup-form" onsubmit="App.handleGateSignUp(event)" style="display:none;">
-        <div class="gate-form-group">
-          <label class="form-label">Full Name *</label>
-          <input type="text" id="gate-signup-fullname" class="form-control" placeholder="e.g. Kumar Sweets Owner" required>
-        </div>
-
-        <div class="form-row">
-          <div class="gate-form-group">
-            <label class="form-label">1st :- Username *</label>
-            <input type="text" id="gate-signup-username" class="form-control" placeholder="username" required autocomplete="username">
+        <!-- Map Picker Trigger Frame -->
+        <div class="saas-map-frame">
+          <div class="lp-map-trigger saas-map-trigger" onclick="LocationPicker.open()">
+            <span class="saas-map-icon">🗺️</span>
+            <div class="saas-map-text">
+              <span class="saas-map-main">Click to Open Mappls Interactive Map</span>
+              <span class="saas-map-sub">Pin location, search address, or auto-detect GPS</span>
+            </div>
+            <span class="saas-map-arrow">›</span>
           </div>
-          <div class="gate-form-group">
-            <label class="form-label">Role *</label>
-            <select id="gate-signup-role" class="form-control" required>
-              <option value="manager">📊 Manager</option>
-              <option value="staff">👨‍🍳 Staff</option>
-              <option value="admin">👑 Admin</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="gate-form-group">
-          <label class="form-label">Email Address *</label>
-          <input type="email" id="gate-signup-email" class="form-control" placeholder="user@restaurant.com" required autocomplete="email">
-        </div>
-
-        <div class="gate-form-group">
-          <label class="form-label">2nd :- Password *</label>
-          <div class="password-input-wrap">
-            <input type="password" id="gate-signup-password" class="form-control" placeholder="••••••••" required minlength="6" autocomplete="new-password">
-            <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-signup-password', this)">👁️</span>
-          </div>
-        </div>
-
-        <!-- ─── RESTAURANT LOCATION ─── -->
-        <div class="gate-form-group">
-          <label class="form-label">📍 Restaurant Location <span style="color:var(--text-3);font-weight:400;font-size:0.72rem;">(optional)</span></label>
-
-          <!-- Large GPS Button -->
-          <button type="button" class="lp-gps-hero-btn" id="lp-gps-hero-btn" onclick="LocationPicker.quickGPS()">
+          <!-- GPS Current Location Hero Button -->
+          <button type="button" class="lp-gps-hero-btn saas-gps-btn" id="lp-gps-hero-btn" onclick="LocationPicker.quickGPS()">
             <span class="lp-gps-pulse-ring"></span>
             📍 Use My Current Location
           </button>
+        </div>
 
-          <!-- Map Picker Trigger -->
-          <div class="lp-map-trigger" onclick="LocationPicker.open()">
-            <span>🗺️</span>
-            <span>Pick Location on Interactive Map</span>
-            <span style="margin-left:auto;opacity:0.5;">›</span>
+        <!-- Real-Time Selected Location Preview Card -->
+        <div class="lp-signup-preview saas-location-preview" id="lp-signup-preview" style="display:none;">
+          <div class="lp-mini-map-box saas-mini-map" id="lp-mini-map-box"></div>
+          <div class="lp-signup-preview-body saas-preview-body">
+            <div class="lp-signup-preview-top saas-preview-top">
+              <span class="lp-signup-preview-emoji saas-preview-emoji" id="lp-signup-preview-emoji">🍽️</span>
+              <div style="flex:1;min-width:0;">
+                <div class="lp-signup-preview-addr saas-preview-addr" id="lp-signup-preview-addr">Loading...</div>
+                <div class="lp-signup-preview-coords saas-preview-coords" id="lp-signup-preview-coords"></div>
+              </div>
+              <button type="button" class="lp-signup-preview-edit saas-preview-edit-btn" onclick="LocationPicker.open()">✏️ Edit Location</button>
+            </div>
+            <div class="lp-signup-preview-chips saas-chips-row" id="lp-signup-preview-chips"></div>
+            <div class="lp-signup-preview-success saas-success-badge">✅ Restaurant location confirmed!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           SECTION 2: REGISTRATION & AUTHENTICATION FORM CARD
+           ════════════════════════════════════════════════ -->
+      <div class="saas-form-card">
+        <!-- Sign In Form (Default Gate View) -->
+        <form id="gate-signin-form" onsubmit="App.handleGateSignIn(event)">
+          <div class="gate-form-group">
+            <label class="form-label">Username or Email *</label>
+            <input type="text" id="gate-username" class="form-control" placeholder="e.g. admin or manager@dinemind.ai" required autocomplete="username">
           </div>
 
-          <!-- Location Preview (hidden until location selected) -->
-          <div class="lp-signup-preview" id="lp-signup-preview" style="display:none;">
-            <div class="lp-mini-map-box" id="lp-mini-map-box"></div>
-            <div class="lp-signup-preview-body">
-              <div class="lp-signup-preview-top">
-                <span class="lp-signup-preview-emoji" id="lp-signup-preview-emoji">🍽️</span>
-                <div style="flex:1;min-width:0;">
-                  <div class="lp-signup-preview-addr" id="lp-signup-preview-addr">Loading...</div>
-                  <div class="lp-signup-preview-coords" id="lp-signup-preview-coords"></div>
-                </div>
-                <button type="button" class="lp-signup-preview-edit" onclick="LocationPicker.open()">✏️ Edit</button>
-              </div>
-              <div class="lp-signup-preview-chips" id="lp-signup-preview-chips"></div>
-              <div class="lp-signup-preview-success">✅ Restaurant location confirmed!</div>
+          <div class="gate-form-group">
+            <label class="form-label">Password *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="gate-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+              <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-password', this)">👁️</span>
             </div>
           </div>
 
-          <!-- Hidden form data -->
+          <div class="gate-actions-row mt-20">
+            <button type="submit" class="btn btn-saas-gradient w-full" id="btn-gate-signin">
+              <span>🔑</span>
+              <span>Sign In to Operations Console</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Sign Up Form (Hidden Gate View) -->
+        <form id="gate-signup-form" onsubmit="App.handleGateSignUp(event)" style="display:none;">
+          <div class="gate-form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="gate-signup-fullname" class="form-control" placeholder="e.g. Kumar Sweets Owner" required>
+          </div>
+
+          <div class="form-row">
+            <div class="gate-form-group">
+              <label class="form-label">Username *</label>
+              <input type="text" id="gate-signup-username" class="form-control" placeholder="username" required autocomplete="username">
+            </div>
+            <div class="gate-form-group">
+              <label class="form-label">Role *</label>
+              <select id="gate-signup-role" class="form-control" required>
+                <option value="manager">📊 Manager</option>
+                <option value="staff">👨‍🍳 Staff</option>
+                <option value="admin">👑 Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="gate-form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="gate-signup-email" class="form-control" placeholder="user@restaurant.com" required autocomplete="email">
+          </div>
+
+          <div class="gate-form-group">
+            <label class="form-label">Password *</label>
+            <div class="password-input-wrap">
+              <input type="password" id="gate-signup-password" class="form-control" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+              <span class="password-toggle-icon" onclick="App.togglePasswordVisibility('gate-signup-password', this)">👁️</span>
+            </div>
+          </div>
+
+          <!-- Hidden location coordinate fields -->
           <input type="hidden" id="signup-lat">
           <input type="hidden" id="signup-lng">
           <input type="hidden" id="signup-formatted-address">
           <input type="hidden" id="signup-city">
           <input type="hidden" id="signup-country">
           <input type="hidden" id="signup-marker-emoji" value="🍽️">
-        </div>
 
-        <div class="gate-actions-row mt-16">
-          <button type="submit" class="btn btn-gold w-full" id="btn-gate-signup">
-            <span>✨</span>
-            <span>Create Account &amp; Enter</span>
+          <div class="gate-actions-row mt-20">
+            <button type="submit" class="btn btn-saas-gradient w-full" id="btn-gate-signup">
+              <span>✨</span>
+              <span>Create Account &amp; Enter</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Gate Footer Controls & Visitor Entry -->
+        <div class="gate-footer mt-16">
+          <button type="button" class="btn btn-glass w-full" onclick="App.enterAsVisitor()">
+            <span>👀</span>
+            <span>Explore as Guest / Visitor Demo</span>
           </button>
-        </div>
-      </form>
 
-      <!-- Gate Footer Controls & Visitor Entry -->
-      <div class="gate-footer mt-16">
-        <button type="button" class="btn btn-glass w-full" onclick="App.enterAsVisitor()">
-          <span>👀</span>
-          <span>Explore as Guest / Visitor Demo</span>
-        </button>
-
-        <div class="gate-toggle-link text-center mt-12">
-          <span id="gate-toggle-text" class="text-3 text-xs">Don't have an account? <a href="#" onclick="App.toggleGateView(); return false;" class="text-gold font-bold">Sign Up</a></span>
+          <div class="gate-toggle-link text-center mt-12">
+            <span id="gate-toggle-text" class="text-3 text-xs">Don't have an account? <a href="#" onclick="App.toggleGateView(); return false;" class="text-gold font-bold">Sign Up</a></span>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 
