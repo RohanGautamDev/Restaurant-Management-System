@@ -202,19 +202,59 @@ const LocationPicker = (() => {
   function toggleLayer() {
     if (!map) return;
     const btn = document.getElementById('lp-layer-toggle-btn');
+    const M = getMappls();
 
-    try {
-      if (currentLayerType === 'vector') {
-        if (typeof map.setLayer === 'function') map.setLayer('hybrid');
-        currentLayerType = 'hybrid';
-        if (btn) btn.innerHTML = '🗺️ Map View';
-      } else {
-        if (typeof map.setLayer === 'function') map.setLayer('vector');
-        currentLayerType = 'vector';
-        if (btn) btn.innerHTML = '🛰️ Satellite View';
+    const isVector = (currentLayerType === 'vector');
+    const targetLayer = isVector ? 'hybrid' : 'vector';
+    const targetStyle = isVector ? 'satellite' : 'standard';
+
+    let switched = false;
+
+    // 1. Try map.setStyle (MapLibre / Mapbox style API)
+    if (typeof map.setStyle === 'function') {
+      try {
+        map.setStyle(targetLayer);
+        switched = true;
+      } catch (e) {
+        try {
+          map.setStyle(targetStyle);
+          switched = true;
+        } catch (e2) {}
       }
-    } catch (e) {
-      console.log('Mappls layer toggle handled:', e.message);
+    }
+
+    // 2. Try map.setLayer
+    if (!switched && typeof map.setLayer === 'function') {
+      try {
+        map.setLayer(targetLayer);
+        switched = true;
+      } catch (e) {
+        try {
+          map.setLayer(targetStyle);
+          switched = true;
+        } catch (e2) {}
+      }
+    }
+
+    // 3. Try M.setLayer / M.setStyle (Mappls global SDK API)
+    if (!switched && M) {
+      if (typeof M.setLayer === 'function') {
+        try {
+          M.setLayer(targetLayer);
+          switched = true;
+        } catch (e) {}
+      }
+      if (!switched && typeof M.setStyle === 'function') {
+        try {
+          M.setStyle(targetLayer);
+          switched = true;
+        } catch (e) {}
+      }
+    }
+
+    currentLayerType = targetLayer;
+    if (btn) {
+      btn.innerHTML = (targetLayer === 'hybrid') ? '🗺️ Map View' : '🛰️ Satellite View';
     }
   }
 
