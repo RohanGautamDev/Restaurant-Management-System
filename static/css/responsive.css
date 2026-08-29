@@ -214,32 +214,43 @@ body {
   }
 
   /* 2-Column Hero Section Banner Mobile Stacking */
-  .saas-hero-banner {
-    grid-template-columns: 1fr;
-    gap: 24px;
-    text-align: center;
-  }
+  @media (max-width: 860px) {
+    .saas-hero-banner {
+      flex-direction: column;
+      gap: 28px;
+      text-align: center;
+    }
 
-  .saas-hero-left {
-    align-items: center;
-    text-align: center;
-  }
+    .saas-hero-left {
+      flex: 0 0 100%;
+      max-width: 100%;
+      align-items: center;
+      text-align: center;
+    }
 
-  .saas-main-title {
-    font-size: 1.75rem;
-  }
+    .saas-hero-right {
+      flex: 0 0 100%;
+      max-width: 100%;
+      justify-content: center;
+    }
 
-  .saas-main-desc {
-    max-width: 100%;
-  }
+    .saas-main-title {
+      font-size: 1.85rem;
+    }
 
-  .saas-hero-chips {
-    justify-content: center;
-  }
+    .saas-main-desc {
+      max-width: 100%;
+    }
 
-  .saas-bbq-wrap {
-    width: 220px;
-    height: 220px;
+    .saas-hero-chips {
+      justify-content: center;
+    }
+
+    .saas-bbq-wrap {
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
+    }
   }
 
   /* KPI: 2 columns on tablet */

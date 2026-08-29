@@ -853,26 +853,29 @@ textarea.form-control {
 
 .saas-gate-container {
   width: 100%;
-  max-width: 860px;
+  max-width: 1100px;
   margin: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
   z-index: 2;
   position: relative;
 }
 
-/* 2-Column Hero Section Banner */
+/* 2-Column Hero Section Banner (55% Left / 45% Right) */
 .saas-hero-banner {
-  display: grid;
-  grid-template-columns: 1fr 290px;
-  gap: 32px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  padding: 12px 4px;
+  gap: 40px;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 20px 0;
 }
 
 .saas-hero-left {
+  flex: 0 0 55%;
+  max-width: 55%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -883,61 +886,93 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 14px;
+  background: rgba(56, 239, 125, 0.08);
+  border: 1px solid rgba(56, 239, 125, 0.22);
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #38ef7d;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .saas-main-title {
-  font-size: 2.1rem;
+  font-size: 2.5rem;
   font-weight: 800;
   line-height: 1.15;
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.8px;
-  margin: 0 0 10px 0;
+  letter-spacing: -0.9px;
+  margin: 0 0 14px 0;
 }
 
 .saas-main-desc {
-  font-size: 0.90rem;
+  font-size: 0.95rem;
   color: var(--text-2);
-  line-height: 1.5;
-  margin: 0 0 16px 0;
-  max-width: 500px;
+  line-height: 1.55;
+  margin: 0 0 20px 0;
+  max-width: 540px;
 }
 
 .saas-hero-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 22px;
 }
 
 .saas-hero-chip {
-  padding: 5px 11px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-1);
 }
 
-.saas-hero-right {
+.saas-hero-cta-wrap {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+}
+
+.saas-hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0d1225;
+  background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+  border: none;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(56, 239, 125, 0.3);
+  transition: all 0.25 ease;
+  cursor: pointer;
+}
+
+.saas-hero-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(56, 239, 125, 0.45);
+  background: linear-gradient(135deg, #45f589 0%, #13a89c 100%);
+}
+
+.saas-hero-right {
+  flex: 0 0 42%;
+  max-width: 42%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .saas-bbq-wrap {
-  width: 270px;
-  height: 270px;
-  margin: 0 auto;
+  width: 340px;
+  height: 340px;
+  margin: 0 0 0 auto;
   position: relative;
   display: flex;
   align-items: center;
@@ -945,8 +980,8 @@ textarea.form-control {
 }
 
 .saas-bbq-glow {
-  inset: -16px;
-  opacity: 0.9;
+  inset: -20px;
+  opacity: 0.95;
 }
 
 .saas-bbq-img {
@@ -955,6 +990,16 @@ textarea.form-control {
   object-fit: contain;
   border-radius: 50%;
   display: block;
+}
+
+/* Form Content Container Below Hero Banner */
+.apple-segmented-box,
+.saas-hero-card,
+#gate-signup-form {
+  max-width: 780px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Section 1: Hero Location Card */
