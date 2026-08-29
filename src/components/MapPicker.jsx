@@ -60,32 +60,23 @@ const MapPicker = ({
           return;
         }
 
-        // Fallback using standard reverse geocode endpoint if SDK plugin is unavailable
-        const fallbackRes = await fetch(
-          `https://apis.mappls.com/advancedmaps/v1/${mapplsApiKey}/rev_geocode?lat=${lat}&lng=${lng}`
-        );
+        // Proxy through backend endpoint to prevent CORS blocks
+        const fallbackRes = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
         if (fallbackRes.ok) {
           const resData = await fallbackRes.json();
-          if (resData?.results?.[0]) {
-            const item = resData.results[0];
-            const addr = item.formatted_address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-            setSelectedAddress(addr);
-            if (onLocationSelect) {
-              onLocationSelect({
-                address: addr,
-                lat,
-                lng,
-                city: item.city || '',
-                state: item.state || '',
-                pincode: item.pincode || '',
-              });
-            }
-            return;
+          const addr = resData.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setSelectedAddress(addr);
+          if (onLocationSelect) {
+            onLocationSelect({
+              address: addr,
+              lat,
+              lng,
+              city: resData.city || '',
+              state: resData.state || '',
+              pincode: resData.postcode || '',
+            });
           }
         }
-
-        // Default coordinate label
-        const defaultAddr = `Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         setSelectedAddress(defaultAddr);
         if (onLocationSelect) {
           onLocationSelect({ address: defaultAddr, lat, lng });
@@ -287,14 +278,12 @@ const MapPicker = ({
           return;
         }
 
-        // REST AutoSuggest Fallback
-        const res = await fetch(
-          `https://atlas.mappls.com/api/places/search/json?query=${encodeURIComponent(value)}&access_token=${mapplsApiKey}`
-        );
+        // Proxy search through backend endpoint to prevent CORS blocks
+        const res = await fetch(`/api/search?query=${encodeURIComponent(value)}`);
         const data = await res.json();
         setIsSearching(false);
-        if (data && data.suggestedLocations) {
-          setSuggestions(data.suggestedLocations);
+        if (data && data.results) {
+          setSuggestions(data.results);
         }
       } catch (err) {
         setIsSearching(false);

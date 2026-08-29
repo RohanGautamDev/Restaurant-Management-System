@@ -1,17 +1,17 @@
 /**
  * DineMind AI — Location Picker
- * Powered by Mappls (MapmyIndia) Web SDK v3.0 & Leaflet.js Dual Engine
+ * Powered by official Mappls (MapmyIndia) Web SDK v3.0 & Backend Express API Proxy
  *
- * Requirements & Features:
- *  - Primary Engine: Official Mappls Map SDK v3.0 (Vector & Hybrid Satellite)
- *  - Automatic Fallback Engine: Leaflet.js + OpenStreetMap + Nominatim
- *  - Dynamic engine detection and seamless error recovery (handles 401 Unauthorized API keys gracefully)
- *  - Interactive map with Click-to-Pin and Draggable Emoji Marker
+ * Requirements & Architecture:
+ *  - Official Mappls Web SDK: https://sdk.mappls.com/map/sdk/web?v=3.0&access_token=...
+ *  - Strict Backend Proxying: ZERO direct browser REST requests to apis.mappls.com or atlas.mappls.com
+ *  - Bypasses browser CORS policy completely by fetching from local /api/reverse-geocode & /api/search
+ *  - Interactive Mappls Map with Click-to-Pin and Draggable Marker
  *  - GPS Geolocation (Detect Current Location)
- *  - Address search / autocomplete with debounced API queries
- *  - Reverse geocoding (Auto-fills Address, City, State, Country, Postcode)
- *  - Business Icon / Emoji Marker selector
- *  - Mini preview map on signup form
+ *  - Debounced Address Search / Autocomplete via backend proxy
+ *  - Reverse Geocoding (Auto-fills Address, City, State, Country, Postcode)
+ *  - Emoji Marker Selector
+ *  - Mini Preview Map on signup form
  */
 
 const LocationPicker = (() => {
@@ -20,7 +20,6 @@ const LocationPicker = (() => {
   let map = null;
   let marker = null;
   let miniMap = null;
-  let activeEngine = 'mappls'; // 'mappls' or 'leaflet'
   let selectedLat = 28.6139;   // Default: New Delhi / India
   let selectedLng = 77.2090;
   let selectedAddr = '';
@@ -30,13 +29,8 @@ const LocationPicker = (() => {
   let currentSuggestions = [];
   let currentLayerType = 'vector'; // vector or hybrid/satellite
   let mapplsApiKey = 'mdwallaqjppbxotocjucfjxjronwpotbclru';
-  let leafletTileLayer = null;
 
-  // Tile endpoints for Leaflet Fallback
-  const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  const ESRI_SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-
-  // ── Ensure window.mappls is always defined if present ───────────────────
+  // ── Ensure window.mappls is accessible ─────────────────────────────────
   function getMappls() {
     if (typeof window !== 'undefined') {
       if (window.Mappls && !window.mappls) window.mappls = window.Mappls;
@@ -46,40 +40,23 @@ const LocationPicker = (() => {
     return null;
   }
 
-  // ── Custom Leaflet Pin Icon Generator ──────────────────────────────────
-  function makeLeafletIcon(emoji) {
-    if (typeof L === 'undefined') return null;
-    const char = emoji || selectedEmoji || '🍽️';
-    return L.divIcon({
-      className: 'lp-custom-pin-wrap',
-      html: `
-        <div class="lp-custom-pin-body" data-emoji="${char}">
-          <span class="lp-pin-emoji">${char}</span>
-        </div>
-        <div class="lp-custom-pin-pulse"></div>
-      `,
-      iconSize: [44, 52],
-      iconAnchor: [22, 48],
-      popupAnchor: [0, -45]
-    });
-  }
-
-  // ── Load Mappls SDK dynamically if needed ──────────────────────────────
+  // ── Fetch Client Config from Backend Proxy (/api/config) ────────────────
   async function fetchServerConfig() {
     try {
       const res = await fetch('/api/config');
       if (res.ok) {
         const config = await res.json();
-        if (config.mapplsApiKey) {
-          mapplsApiKey = config.mapplsApiKey;
+        if (config.mapplsKey || config.mapplsApiKey) {
+          mapplsApiKey = config.mapplsKey || config.mapplsApiKey;
         }
       }
     } catch (e) {
-      console.warn('DineMind AI: Using fallback client configuration.');
+      console.warn('DineMind AI: Using fallback client API key.');
     }
   }
 
-  async function tryLoadMapplsSdk() {
+  // ── Load Mappls Web SDK v3.0 ───────────────────────────────────────────
+  async function loadMapplsSdk() {
     await fetchServerConfig();
     const M = getMappls();
     if (M && M.Map) return M;
@@ -93,9 +70,9 @@ const LocationPicker = (() => {
           if (sdk && sdk.Map) {
             clearInterval(checkInterval);
             resolve(sdk);
-          } else if (attempts++ > 15) {
+          } else if (attempts++ > 20) {
             clearInterval(checkInterval);
-            reject(new Error('Mappls SDK window object not found'));
+            reject(new Error('Mappls Web SDK failed to initialize in DOM'));
           }
         }, 100);
         return;
@@ -106,131 +83,83 @@ const LocationPicker = (() => {
       script.src = `https://sdk.mappls.com/map/sdk/web?v=3.0&access_token=${mapplsApiKey}`;
       script.async = true;
       script.onload = () => {
-        const sdk = getMappls();
-        if (sdk && sdk.Map) {
-          resolve(sdk);
-        } else {
-          reject(new Error('Mappls SDK loaded without Map module'));
-        }
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          const sdk = getMappls();
+          if (sdk && sdk.Map) {
+            clearInterval(checkInterval);
+            resolve(sdk);
+          } else if (attempts++ > 15) {
+            clearInterval(checkInterval);
+            resolve(getMappls());
+          }
+        }, 100);
       };
       script.onerror = () => {
-        reject(new Error('Failed to fetch Mappls Web SDK bundle'));
+        reject(new Error('Failed to fetch Mappls Web SDK script'));
       };
       document.head.appendChild(script);
     });
   }
 
-  // ── Load Leaflet dynamically if not on page ───────────────────────────
-  async function ensureLeafletLoaded() {
-    if (typeof L !== 'undefined') return true;
-
-    return new Promise((resolve, reject) => {
-      if (!document.getElementById('leaflet-css-fallback')) {
-        const link = document.createElement('link');
-        link.id = 'leaflet-css-fallback';
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
-      }
-
-      const script = document.createElement('script');
-      script.id = 'leaflet-js-fallback';
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Failed to load Leaflet script fallback'));
-      document.head.appendChild(script);
-    });
-  }
-
-  // ── Main Map Initialization ───────────────────────────────────────────
+  // ── Initialize Mappls Map ──────────────────────────────────────────────
   async function initMap() {
     const mapEl = document.getElementById('lp-map');
     if (!mapEl) return;
 
-    // Reset container if recreating
-    if (map) {
-      try {
-        if (typeof map.remove === 'function') map.remove();
-      } catch (e) {}
-      map = null;
-      marker = null;
-    }
-
-    mapEl.innerHTML = '';
-
-    // Attempt Mappls initialization first
     try {
-      const M = await tryLoadMapplsSdk();
-      if (M && M.Map) {
-        map = new M.Map('lp-map', {
-          center: [selectedLat, selectedLng],
-          zoom: 15,
-          zoomControl: true,
-          hybrid: false,
-          location: true,
-        });
+      await loadMapplsSdk();
+      const M = getMappls();
 
-        activeEngine = 'mappls';
-        setStatus('🗺️ Mappls Map (MapmyIndia) Active');
-
-        map.addListener('click', (e) => {
-          if (e && e.lngLat) {
-            placeMarker(e.lngLat.lat, e.lngLat.lng, true);
-          }
-        });
-
-        map.on('load', () => {
-          placeMarker(selectedLat, selectedLng, true);
-        });
-
-        setupSearchAndListeners();
+      if (!M || !M.Map) {
+        setStatus('⚠️ Mappls SDK loading... please wait.');
+        setTimeout(initMap, 500);
         return;
       }
-    } catch (err) {
-      console.warn('Mappls SDK unavailable or unauthorized (401). Falling back to OpenStreetMap / Leaflet engine.', err.message);
-    }
 
-    // Fallback to Leaflet + OpenStreetMap engine
-    try {
-      await ensureLeafletLoaded();
-      activeEngine = 'leaflet';
+      if (map) {
+        if (typeof map.resize === 'function') map.resize();
+        return;
+      }
 
-      map = L.map(mapEl, {
+      mapEl.innerHTML = '';
+
+      // Instantiate Official Mappls Map
+      map = new M.Map('lp-map', {
         center: [selectedLat, selectedLng],
         zoom: 15,
         zoomControl: true,
+        hybrid: false,
+        location: true,
       });
 
-      leafletTileLayer = L.tileLayer(OSM_TILE_URL, {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+      setStatus('🗺️ Official Mappls Map Active');
 
-      map.on('click', (e) => {
-        placeMarker(e.latlng.lat, e.latlng.lng, true);
-      });
-
-      placeMarker(selectedLat, selectedLng, true);
-      setStatus('🗺️ OpenStreetMap Active (Fallback Mode)');
-
-      setTimeout(() => {
-        if (map && typeof map.invalidateSize === 'function') {
-          map.invalidateSize(true);
+      // Map Click Handler
+      map.addListener('click', (e) => {
+        if (e && e.lngLat) {
+          placeMarker(e.lngLat.lat, e.lngLat.lng, true);
         }
-      }, 250);
+      });
 
-      setupSearchAndListeners();
-    } catch (fallbackErr) {
-      console.error('Map initialization failed on both engines:', fallbackErr);
-      setStatus('⚠️ Map service offline. Search address or use GPS.');
+      // Initial Marker Placement
+      map.on('load', () => {
+        placeMarker(selectedLat, selectedLng, true);
+      });
+
+      setupSearchInputHandlers();
+
+    } catch (err) {
+      console.error('Error initializing Mappls Map:', err);
+      setStatus('⚠️ Unable to connect to Mappls Map service.');
     }
   }
 
-  // ── Setup Event Listeners for Search & Dropdown ────────────────────────
-  function setupSearchAndListeners() {
+  // ── Setup Search Input and Dropdown Handlers ───────────────────────────
+  function setupSearchInputHandlers() {
     const input = document.getElementById('lp-search-input');
-    if (input && !input._lpInit) {
-      input._lpInit = true;
+    if (input && !input._lpBound) {
+      input._lpBound = true;
       input.oninput = (e) => onSearch(e.target.value);
       input.onkeydown = (e) => {
         if (e.key === 'Escape') {
@@ -238,7 +167,7 @@ const LocationPicker = (() => {
         } else if (e.key === 'Enter') {
           e.preventDefault();
           clearTimeout(searchTimer);
-          if (e.target.value.trim().length >= 3) {
+          if (e.target.value.trim().length >= 2) {
             fetchSuggestions(e.target.value.trim());
           }
         }
@@ -246,8 +175,8 @@ const LocationPicker = (() => {
     }
 
     const dd = document.getElementById('lp-dropdown');
-    if (dd && !dd._lpInit) {
-      dd._lpInit = true;
+    if (dd && !dd._lpBound) {
+      dd._lpBound = true;
       dd.onclick = (e) => {
         const item = e.target.closest('.lp-dd-item');
         if (item) {
@@ -260,8 +189,8 @@ const LocationPicker = (() => {
       };
     }
 
-    if (!document._lpOutsideClick) {
-      document._lpOutsideClick = true;
+    if (!document._lpOutsideBound) {
+      document._lpOutsideBound = true;
       document.addEventListener('click', (e) => {
         const section = document.getElementById('lp-search-section');
         if (section && !section.contains(e.target)) closeDropdown();
@@ -274,100 +203,63 @@ const LocationPicker = (() => {
     if (!map) return;
     const btn = document.getElementById('lp-layer-toggle-btn');
 
-    if (activeEngine === 'mappls') {
-      try {
-        if (currentLayerType === 'vector') {
-          if (typeof map.setLayer === 'function') map.setLayer('hybrid');
-          currentLayerType = 'hybrid';
-          if (btn) btn.innerHTML = '🗺️ Map View';
-        } else {
-          if (typeof map.setLayer === 'function') map.setLayer('vector');
-          currentLayerType = 'vector';
-          if (btn) btn.innerHTML = '🛰️ Satellite View';
-        }
-      } catch (e) {
-        console.log('Mappls layer toggle handled:', e.message);
-      }
-    } else if (activeEngine === 'leaflet') {
+    try {
       if (currentLayerType === 'vector') {
-        if (leafletTileLayer && map) map.removeLayer(leafletTileLayer);
-        leafletTileLayer = L.tileLayer(ESRI_SATELLITE_URL, {
-          maxZoom: 18,
-          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        }).addTo(map);
+        if (typeof map.setLayer === 'function') map.setLayer('hybrid');
         currentLayerType = 'hybrid';
         if (btn) btn.innerHTML = '🗺️ Map View';
       } else {
-        if (leafletTileLayer && map) map.removeLayer(leafletTileLayer);
-        leafletTileLayer = L.tileLayer(OSM_TILE_URL, {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        if (typeof map.setLayer === 'function') map.setLayer('vector');
         currentLayerType = 'vector';
         if (btn) btn.innerHTML = '🛰️ Satellite View';
       }
+    } catch (e) {
+      console.log('Mappls layer toggle handled:', e.message);
     }
   }
 
-  // ── Place / Move Marker ────────────────────────────────────────────────
+  // ── Place / Move Mappls Marker ─────────────────────────────────────────
   function placeMarker(lat, lng, doGeocode = true) {
     selectedLat = lat;
     selectedLng = lng;
+    const M = getMappls();
 
-    if (!map) return;
+    if (!map || !M) return;
 
-    if (activeEngine === 'mappls') {
-      const M = getMappls();
-      if (M) {
-        if (!marker) {
-          marker = new M.Marker({
-            map: map,
-            position: { lat: lat, lng: lng },
-            fitbounds: false,
-            draggable: true,
-          });
+    if (!marker) {
+      marker = new M.Marker({
+        map: map,
+        position: { lat: lat, lng: lng },
+        fitbounds: false,
+        draggable: true,
+      });
 
-          if (marker.addListener) {
-            marker.addListener('dragend', (e) => {
-              let newLat = lat;
-              let newLng = lng;
-              if (marker.getPosition) {
-                const pos = marker.getPosition();
-                newLat = pos.lat;
-                newLng = pos.lng;
-              } else if (e && e.target && typeof e.target.getPosition === 'function') {
-                const pos = e.target.getPosition();
-                newLat = pos.lat;
-                newLng = pos.lng;
-              }
-              selectedLat = newLat;
-              selectedLng = newLng;
-              reverseGeocode(newLat, newLng);
-            });
+      if (marker.addListener) {
+        marker.addListener('dragend', (e) => {
+          let newLat = lat;
+          let newLng = lng;
+          if (marker.getPosition) {
+            const pos = marker.getPosition();
+            newLat = pos.lat;
+            newLng = pos.lng;
+          } else if (e && e.target && typeof e.target.getPosition === 'function') {
+            const pos = e.target.getPosition();
+            newLat = pos.lat;
+            newLng = pos.lng;
           }
-        } else {
-          if (marker.setPosition) marker.setPosition({ lat: lat, lng: lng });
-        }
-        if (map.setCenter) map.setCenter({ lat: lat, lng: lng });
-      }
-    } else if (activeEngine === 'leaflet') {
-      if (!marker) {
-        marker = L.marker([lat, lng], {
-          icon: makeLeafletIcon(selectedEmoji),
-          draggable: true,
-        }).addTo(map);
-
-        marker.on('dragend', (e) => {
-          const pos = e.target.getLatLng();
-          selectedLat = pos.lat;
-          selectedLng = pos.lng;
-          reverseGeocode(pos.lat, pos.lng);
+          selectedLat = newLat;
+          selectedLng = newLng;
+          reverseGeocode(newLat, newLng);
         });
-      } else {
-        marker.setLatLng([lat, lng]);
-        marker.setIcon(makeLeafletIcon(selectedEmoji));
       }
-      map.panTo([lat, lng]);
+    } else {
+      if (marker.setPosition) {
+        marker.setPosition({ lat: lat, lng: lng });
+      }
+    }
+
+    if (map.setCenter) {
+      map.setCenter({ lat: lat, lng: lng });
     }
 
     const confirmBtn = document.getElementById('lp-confirm-btn');
@@ -378,80 +270,36 @@ const LocationPicker = (() => {
     }
   }
 
-  // ── Reverse Geocoding ──────────────────────────────────────────────────
+  // ── Reverse Geocoding via Backend Proxy ONLY ───────────────────────────
   async function reverseGeocode(lat, lng) {
     if (isGeocoding) return;
     isGeocoding = true;
-    setStatus('🔄 Locating address...');
+    setStatus('🔄 Locating address with Mappls API Proxy...');
 
-    // 1. If on Mappls engine, try Mappls pinCode / rev_geocode
-    if (activeEngine === 'mappls') {
-      const M = getMappls();
-      try {
-        if (M && typeof M.pinCode === 'function') {
-          M.pinCode({ lat, lng }, (data) => {
-            if (data && data.data && data.data.length > 0) {
-              const res = data.data[0];
-              const addr = res.formatted_address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-              selectedAddr = addr;
-              setStatus(`📍 ${trunc(addr, 65)}`);
-              showFound(addr, lat, lng, res.city || res.district || '', res.state || '', 'India', res.pincode || '');
-              window._lpData = { lat, lng, address: addr, city: res.city || '', state: res.state || '', country: 'India', postcode: res.pincode || '' };
-            }
-          });
-          isGeocoding = false;
-          return;
-        }
-
-        const res = await fetch(`https://apis.mappls.com/advancedmaps/v1/${mapplsApiKey}/rev_geocode?lat=${lat}&lng=${lng}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.results?.[0]) {
-            const item = data.results[0];
-            const addr = item.formatted_address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-            selectedAddr = addr;
-            setStatus(`📍 ${trunc(addr, 65)}`);
-            showFound(addr, lat, lng, item.city || '', item.state || '', item.country || 'India', item.pincode || '');
-            window._lpData = { lat, lng, address: addr, city: item.city || '', state: item.state || '', country: item.country || 'India', postcode: item.pincode || '' };
-            isGeocoding = false;
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Mappls rev_geocode failed, trying Nominatim fallback...');
-      }
-    }
-
-    // 2. Fallback to Nominatim Reverse Geocoding API
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`);
+      // Clean backend proxy call — ZERO CORS errors
+      const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
       if (res.ok) {
         const data = await res.json();
-        const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        const a = data.address || {};
-        const city = a.city || a.town || a.village || a.suburb || '';
-        const state = a.state || '';
-        const country = a.country || 'India';
-        const postcode = a.postcode || '';
-
+        const addr = data.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         selectedAddr = addr;
         setStatus(`📍 ${trunc(addr, 65)}`);
-        showFound(addr, lat, lng, city, state, country, postcode);
-        window._lpData = { lat, lng, address: addr, city, state, country, postcode };
-        isGeocoding = false;
+        showFound(addr, lat, lng, data.city || '', data.state || '', data.country || 'India', data.postcode || '');
+        window._lpData = { lat, lng, address: addr, city: data.city || '', state: data.state || '', country: data.country || 'India', postcode: data.postcode || '' };
         return;
       }
     } catch (err) {
-      console.warn('Nominatim reverse geocoding failed:', err);
+      console.warn('Backend proxy reverse-geocoding call error:', err.message);
+    } finally {
+      isGeocoding = false;
     }
 
-    // 3. Fallback coordinates label
+    // Fallback display if backend unreachable
     const coordStr = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     selectedAddr = coordStr;
     setStatus(`📍 ${coordStr}`);
     showFound(coordStr, lat, lng, '', '', 'India', '');
     window._lpData = { lat, lng, address: coordStr, city: '', state: '', country: 'India', postcode: '' };
-    isGeocoding = false;
   }
 
   // ── Discovery Confirmation Card ────────────────────────────────────────
@@ -478,11 +326,11 @@ const LocationPicker = (() => {
     card.style.display = 'flex';
   }
 
-  // ── Address Search / Autocomplete ──────────────────────────────────────
+  // ── Address Search / Autocomplete via Backend Proxy ONLY ────────────────
   function onSearch(value) {
     clearTimeout(searchTimer);
 
-    if (!value || value.trim().length < 3) {
+    if (!value || value.trim().length < 2) {
       closeDropdown();
       return;
     }
@@ -491,49 +339,19 @@ const LocationPicker = (() => {
   }
 
   async function fetchSuggestions(query) {
-    // 1. Try Mappls search if on Mappls engine
-    if (activeEngine === 'mappls') {
-      const M = getMappls();
-      try {
-        if (M && typeof M.search === 'function') {
-          M.search(query, { location: [selectedLat, selectedLng] }, (data) => {
-            if (data && data.data) {
-              currentSuggestions = data.data;
-              renderDropdown(data.data, query);
-            }
-          });
+    try {
+      // Clean backend proxy call — ZERO CORS errors
+      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&lat=${selectedLat}&lng=${selectedLng}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.results) {
+          currentSuggestions = data.results;
+          renderDropdown(data.results, query);
           return;
         }
-
-        const res = await fetch(`https://atlas.mappls.com/api/places/search/json?query=${encodeURIComponent(query)}&access_token=${mapplsApiKey}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.suggestedLocations) {
-            currentSuggestions = data.suggestedLocations;
-            renderDropdown(data.suggestedLocations, query);
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Mappls search failed, falling back to Nominatim...');
-      }
-    }
-
-    // 2. Fallback Nominatim Search API
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&countrycodes=in`);
-      if (res.ok) {
-        const results = await res.json();
-        currentSuggestions = results.map(r => ({
-          placeName: r.display_name,
-          placeAddress: r.display_name,
-          latitude: parseFloat(r.lat),
-          longitude: parseFloat(r.lon)
-        }));
-        renderDropdown(currentSuggestions, query);
-        return;
       }
     } catch (e) {
+      console.warn('Backend proxy search call error:', e.message);
       closeDropdown();
     }
   }
@@ -549,8 +367,8 @@ const LocationPicker = (() => {
     }
 
     dd.innerHTML = results.map((r, i) => {
-      const name = r.placeName || r.placeAddress || r.formatted_address || 'Location';
-      const sub = r.placeAddress || r.address || '';
+      const name = r.placeName || r.placeAddress || 'Location';
+      const sub = r.placeAddress || '';
       return `
         <div class="lp-dd-item" data-index="${i}">
           <span class="lp-dd-pin">📍</span>
@@ -568,7 +386,7 @@ const LocationPicker = (() => {
   function selectSuggestion(item) {
     closeDropdown();
     const input = document.getElementById('lp-search-input');
-    const name = item.placeName || item.placeAddress || item.formatted_address || '';
+    const name = item.placeName || item.placeAddress || '';
     if (input) input.value = name;
 
     const lat = parseFloat(item.latitude || item.lat);
@@ -657,10 +475,6 @@ const LocationPicker = (() => {
     document.querySelectorAll('.lp-emoji-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
-    if (activeEngine === 'leaflet' && marker) {
-      marker.setIcon(makeLeafletIcon(emoji));
-    }
-
     const iconEl = document.getElementById('lp-found-emoji');
     if (iconEl) iconEl.textContent = emoji;
 
@@ -724,47 +538,25 @@ const LocationPicker = (() => {
     if (!container || container._miniMapInit) return;
     container._miniMapInit = true;
 
+    const M = getMappls();
+    if (!M || !M.Map) return;
+
     try {
       container.innerHTML = '';
+      miniMap = new M.Map(container, {
+        center: [lat, lng],
+        zoom: 15,
+        zoomControl: false,
+        draggable: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+      });
 
-      if (activeEngine === 'mappls') {
-        const M = getMappls();
-        if (M && M.Map) {
-          miniMap = new M.Map(container, {
-            center: [lat, lng],
-            zoom: 15,
-            zoomControl: false,
-            draggable: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false,
-          });
-
-          new M.Marker({
-            map: miniMap,
-            position: { lat, lng },
-            draggable: false,
-          });
-          return;
-        }
-      }
-
-      // Leaflet Mini Map Fallback
-      if (typeof L !== 'undefined') {
-        const mini = L.map(container, {
-          center: [lat, lng],
-          zoom: 15,
-          zoomControl: false,
-          dragging: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          attributionControl: false,
-        });
-
-        L.tileLayer(OSM_TILE_URL, { maxZoom: 19 }).addTo(mini);
-        L.marker([lat, lng], { icon: makeLeafletIcon(selectedEmoji) }).addTo(mini);
-        miniMap = mini;
-        setTimeout(() => mini.invalidateSize(true), 200);
-      }
+      new M.Marker({
+        map: miniMap,
+        position: { lat, lng },
+        draggable: false,
+      });
     } catch (e) {
       console.log('Mini map initialized');
     }
