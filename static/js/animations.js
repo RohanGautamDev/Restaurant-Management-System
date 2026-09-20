@@ -14,6 +14,11 @@ const Motion = {
   animId: null,
 
   init() {
+    if (window.innerWidth <= 860 || 'ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const canvas = document.getElementById('kinetic-canvas');
+      if (canvas) canvas.style.display = 'none';
+      return;
+    }
     this.initMouseTracking();
     this.initFluidCanvas();
     // 3D card tilt and magnetic button pulling disabled for flat, stable, non-zigzagging boxes

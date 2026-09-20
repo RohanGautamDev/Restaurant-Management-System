@@ -5,7 +5,9 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "seed": "node db/seed.js"
   },
   "keywords": [
@@ -20,10 +22,13 @@
   "author": "Rohan",
   "license": "MIT",
   "dependencies": {
+    "better-sqlite3": "^11.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "morgan": "^1.10.0",
-    "better-sqlite3": "^11.8.1"
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
   }
 }

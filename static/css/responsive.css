@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   DineMind AI — responsive.css  (COMPLETE REWRITE)
-   All breakpoints: Desktop → Tablet → Mobile → XS
+   DineMind AI — responsive.css  (UPDATED FOR FULL PARITY)
+   All breakpoints + Desktop Mode Forced Switcher + Mobile Parity
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Global: prevent horizontal scroll on ALL screens ─── */
+/* ─── Global: prevent unwanted overflow ─── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -23,7 +23,6 @@ body {
 .app-container,
 .main-wrapper,
 .content-area {
-  overflow-x: hidden;
   max-width: 100%;
 }
 
@@ -33,7 +32,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 180px;
   font-size: 0.88rem;
   background: linear-gradient(135deg, #ffffff 0%, var(--gold-light) 100%);
   -webkit-background-clip: text;
@@ -85,7 +84,7 @@ body {
   line-height: 1.4;
 }
 
-/* ─── Mobile Hamburger (hidden on desktop) ─── */
+/* ─── Mobile Hamburger Button ─── */
 .mobile-menu-toggle {
   display: none;
   background: rgba(255, 255, 255, 0.08);
@@ -126,436 +125,666 @@ body {
   pointer-events: auto;
 }
 
+/* ─── Touch Responsive Data Tables Container ─── */
+.table-container,
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(8, 12, 24, 0.6);
+  margin-bottom: 16px;
+}
+
+.table-modern {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+/* ─── View Mode Switcher Button Styling ─── */
+.view-mode-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 210, 255, 0.08) !important;
+  border: 1px solid rgba(0, 210, 255, 0.3) !important;
+  color: var(--teal) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  border-radius: var(--r-sm) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-mode-toggle-btn:hover {
+  background: rgba(0, 210, 255, 0.18) !important;
+  border-color: rgba(0, 210, 255, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* ─── KDS Mobile Filter Tabs ─── */
+.kds-mobile-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+}
+
+.kds-tab-btn {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
+
+.kds-tab-btn.active {
+  background: rgba(245, 200, 66, 0.18) !important;
+  border-color: var(--gold) !important;
+  color: var(--gold-light) !important;
+}
+
+
 /* ══════════════════════════════════════════════════════
-   TABLET  ≤ 860px
+   1. FORCED DESKTOP MODE (Triggered via UI Toggle)
+   ══════════════════════════════════════════════════════ */
+body.desktop-mode-forced {
+  overflow-x: auto !important;
+}
+
+body.desktop-mode-forced .app-container {
+  min-width: 1200px !important;
+  width: 1200px !important;
+  overflow-x: visible !important;
+}
+
+body.desktop-mode-forced .sidebar {
+  position: fixed !important;
+  top: 0; left: 0; bottom: 0;
+  width: 250px !important;
+  transform: none !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.desktop-mode-forced .main-wrapper {
+  margin-left: 250px !important;
+  width: 950px !important;
+  max-width: 950px !important;
+}
+
+body.desktop-mode-forced .mobile-menu-toggle {
+  display: none !important;
+}
+
+body.desktop-mode-forced .sidebar-backdrop {
+  display: none !important;
+}
+
+body.desktop-mode-forced .topbar-restaurant-brand,
+body.desktop-mode-forced .breadcrumbs-sep,
+body.desktop-mode-forced .live-clock,
+body.desktop-mode-forced .user-name-title,
+body.desktop-mode-forced .user-role-tag,
+body.desktop-mode-forced .user-info-text {
+  display: inline-block !important;
+}
+
+body.desktop-mode-forced .topbar-right .btn-gold span,
+body.desktop-mode-forced .topbar-right .live-status-pill span {
+  display: inline-block !important;
+}
+
+body.desktop-mode-forced .kpi-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+body.desktop-mode-forced .menu-card-matrix {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+}
+
+body.desktop-mode-forced .table-floor-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   2. TABLET RESPONSIVE  ≤ 860px (Standard Mobile View)
    ══════════════════════════════════════════════════════ */
 @media (max-width: 860px) {
 
-  /* Show hamburger */
-  .mobile-menu-toggle {
+  /* ── 1. HARD GPU PERFORMANCE OPTIMIZATION (Eliminate Lag / Hang) ── */
+  #bg-wrap,
+  #kinetic-canvas,
+  .orb,
+  .saas-bg-glow,
+  .saas-blob,
+  .saas-particle {
+    display: none !important;
+    pointer-events: none !important;
+    animation: none !important;
+  }
+
+  /* Remove heavy GPU backdrop blur on mobile */
+  body:not(.desktop-mode-forced) *,
+  body:not(.desktop-mode-forced) *::before,
+  body:not(.desktop-mode-forced) *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body:not(.desktop-mode-forced) .card-glass,
+  body:not(.desktop-mode-forced) .saas-hero-card,
+  body:not(.desktop-mode-forced) .saas-form-card,
+  body:not(.desktop-mode-forced) .gate-card,
+  body:not(.desktop-mode-forced) .topbar,
+  body:not(.desktop-mode-forced) .sidebar,
+  body:not(.desktop-mode-forced) .modal-window {
+    background: #0d1225 !important;
+    border: 1px solid rgba(120, 150, 255, 0.22) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* ── 2. HIGH CONTRAST TEXT OVERHAUL (Fix Dark / Invisible Text Bug) ── */
+  body:not(.desktop-mode-forced) .saas-main-title,
+  body:not(.desktop-mode-forced) .saas-hero-title,
+  body:not(.desktop-mode-forced) .gate-title,
+  body:not(.desktop-mode-forced) .text-gradient-gold,
+  body:not(.desktop-mode-forced) .text-gradient-blue,
+  body:not(.desktop-mode-forced) .text-gradient-teal,
+  body:not(.desktop-mode-forced) .topbar-restaurant-brand {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  body:not(.desktop-mode-forced) .saas-main-desc,
+  body:not(.desktop-mode-forced) .saas-hero-subtitle,
+  body:not(.desktop-mode-forced) .gate-subtitle {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+  }
+
+  body:not(.desktop-mode-forced) .saas-brand-tag {
+    background: rgba(56, 239, 125, 0.15) !important;
+    border-color: rgba(56, 239, 125, 0.4) !important;
+    color: #38ef7d !important;
+  }
+
+  body:not(.desktop-mode-forced) .saas-hero-chip,
+  body:not(.desktop-mode-forced) .apple-segmented-chip {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+
+  /* Enable Hamburger Button */
+  body:not(.desktop-mode-forced) .mobile-menu-toggle {
     display: flex;
   }
 
-  /* Disable heavy GPU orbs */
-  .orb {
-    display: none !important;
-  }
-
-  /* Sidebar becomes slide-in drawer */
-  .sidebar {
+  /* Transform Sidebar into Slide-in Drawer */
+  body:not(.desktop-mode-forced) .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     z-index: 999;
-    width: 270px;
+    width: 275px;
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
   }
 
-  .sidebar.drawer-open {
+  body:not(.desktop-mode-forced) .sidebar.drawer-open {
     transform: translateX(0);
   }
 
-  /* Main fills full width */
-  .main-wrapper {
+  /* Main Wrapper Fills Screen */
+  body:not(.desktop-mode-forced) .main-wrapper {
     margin-left: 0 !important;
     width: 100% !important;
     max-width: 100vw !important;
   }
 
-  /* Topbar */
-  .topbar {
-    padding: 0 16px;
+  /* Topbar Adjustments */
+  body:not(.desktop-mode-forced) .topbar {
+    padding: 0 12px;
     height: 60px;
+    gap: 8px;
   }
 
-  .topbar-left {
-    gap: 10px;
+  body:not(.desktop-mode-forced) .topbar-left {
+    gap: 8px;
     min-width: 0;
     flex: 1 1 auto;
-    overflow: hidden;
   }
 
-  .topbar-right {
-    gap: 8px;
+  body:not(.desktop-mode-forced) .topbar-right {
+    gap: 6px;
     flex-shrink: 0;
   }
 
-  .breadcrumbs {
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .topbar-restaurant-brand {
+  body:not(.desktop-mode-forced) .topbar-restaurant-brand {
     max-width: 120px;
   }
 
-  /* Content */
-  .content-area {
-    padding: 20px 16px;
+  /* Content area spacing */
+  body:not(.desktop-mode-forced) .content-area {
+    padding: 16px 12px;
   }
 
-  /* Hero banner stacks */
-  .hero-banner {
+  /* Hero Banner Responsiveness */
+  body:not(.desktop-mode-forced) .hero-banner {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    padding: 22px 20px;
+    padding: 20px 16px;
   }
 
-  .hero-visual {
-    align-self: center;
+  body:not(.desktop-mode-forced) .saas-hero-banner {
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    padding: 6px 0;
+    margin-bottom: 0;
   }
 
-  .hero-visual .edge-pinwheel-wrap,
-  .hero-visual svg {
-    width: 90px !important;
-    height: 90px !important;
+  body:not(.desktop-mode-forced) .saas-hero-left {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
   }
 
-  /* 2-Column Hero Section Banner Mobile Stacking */
-  @media (max-width: 860px) {
-    .saas-hero-banner {
-      flex-direction: column;
-      gap: 28px;
-      text-align: center;
-    }
-
-    .saas-hero-left {
-      flex: 0 0 100%;
-      max-width: 100%;
-      align-items: center;
-      text-align: center;
-    }
-
-    .saas-hero-right {
-      flex: 0 0 100%;
-      max-width: 100%;
-      justify-content: center;
-    }
-
-    .saas-main-title {
-      font-size: 1.85rem;
-    }
-
-    .saas-main-desc {
-      max-width: 100%;
-    }
-
-    .saas-hero-chips {
-      justify-content: center;
-    }
-
-    .saas-bbq-wrap {
-      width: 240px;
-      height: 240px;
-      margin: 0 auto;
-    }
+  body:not(.desktop-mode-forced) .saas-brand-tag {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-self: flex-start;
+    margin-left: 0;
+    text-align: left;
   }
 
-  /* KPI: 2 columns on tablet */
-  .kpi-grid {
+  body:not(.desktop-mode-forced) .saas-main-title {
+    display: none !important;
+  }
+
+  body:not(.desktop-mode-forced) .saas-main-desc {
+    font-size: 0.84rem;
+    line-height: 1.45;
+    margin: 0 0 14px 0;
+    max-width: 100%;
+    text-align: left !important;
+  }
+
+  body:not(.desktop-mode-forced) .saas-hero-chips {
+    justify-content: flex-start !important;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 14px;
+    width: 100%;
+  }
+
+  body:not(.desktop-mode-forced) .saas-hero-chip {
+    padding: 4px 9px;
+    font-size: 0.73rem;
+    white-space: nowrap;
+  }
+
+  body:not(.desktop-mode-forced) .saas-hero-cta-wrap {
+    width: 100%;
+    justify-content: flex-start !important;
+    margin-bottom: 4px;
+  }
+
+  body:not(.desktop-mode-forced) .saas-hero-cta-btn {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(56, 239, 125, 0.25);
+  }
+
+  /* Hide unnecessary bloated boxes on mobile view */
+  body:not(.desktop-mode-forced) .saas-hero-right,
+  body:not(.desktop-mode-forced) .saas-hero-card {
+    display: none !important;
+  }
+
+  /* KPI Grid: 2 columns on tablet */
+  body:not(.desktop-mode-forced) .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    gap: 12px;
   }
 }
 
+
 /* ══════════════════════════════════════════════════════
-   MOBILE  ≤ 640px
+   3. MOBILE RESPONSIVE  ≤ 640px (Full Feature Parity)
    ══════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
 
-  /* Content padding */
-  .content-area {
-    padding: 14px 12px;
+  .gate-overlay {
+    padding: 20px 10px !important;
+    min-height: 100vh;
   }
 
-  /* ── Topbar: strict single row, no overflow ── */
-  .topbar {
-    padding: 0 10px;
-    height: 56px;
+  /* Topbar Header: Responsive Flex Wrap / Scroll so ZERO items are lost */
+  body:not(.desktop-mode-forced) .topbar {
+    padding: 6px 10px;
+    min-height: 56px;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 4px;
-    overflow: hidden;
+    gap: 6px;
+    flex-wrap: wrap;
   }
 
-  .topbar-left {
+  body:not(.desktop-mode-forced) .topbar-left {
     display: flex;
     align-items: center;
     gap: 6px;
     min-width: 0;
     flex: 1 1 auto;
-    overflow: hidden;
   }
 
-  .mobile-menu-toggle {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    font-size: 1rem;
-  }
-
-  .breadcrumbs {
+  body:not(.desktop-mode-forced) .breadcrumbs {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     min-width: 0;
-    overflow: hidden;
   }
 
-  /* Hide "BrandName /" on mobile — show only current page */
-  .topbar-restaurant-brand,
-  .breadcrumbs-sep {
-    display: none;
+  body:not(.desktop-mode-forced) .topbar-restaurant-brand {
+    font-size: 0.8rem;
+    max-width: 90px;
+    display: inline-block;
   }
 
-  .breadcrumbs-current {
-    font-size: 0.85rem;
+  body:not(.desktop-mode-forced) .breadcrumbs-sep {
+    display: inline-block;
+  }
+
+  body:not(.desktop-mode-forced) .breadcrumbs-current {
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--text-1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    max-width: 90px;
   }
 
-  .topbar-right {
+  body:not(.desktop-mode-forced) .topbar-right {
     display: flex;
     align-items: center;
     gap: 5px;
-    flex-shrink: 0;
+    flex-wrap: wrap;
   }
 
-  /* Hide clock */
-  .topbar-right .live-clock {
-    display: none !important;
-  }
-
-  /* Kitchen pill: icon (dot) only */
-  .topbar-right .live-status-pill {
-    padding: 6px 8px;
-    min-width: 30px;
-    justify-content: center;
-  }
-
-  .topbar-right .live-status-pill span:not(.status-dot) {
-    display: none;
-  }
-
-  /* New Order: icon (⚡) only */
-  .topbar-right .btn-gold span:last-child {
-    display: none;
-  }
-
-  .topbar-right .btn-gold {
-    padding: 6px 10px;
-    min-width: 34px;
-    gap: 0;
-  }
-
-  /* Auth pill: avatar only */
-  .user-name-title,
-  .user-role-tag {
-    display: none !important;
-  }
-
-  .user-info-text {
-    display: none !important;
-  }
-
-  .user-profile-pill {
-    padding: 4px 6px;
-    gap: 4px;
-  }
-
-  .btn-signout {
-    font-size: 0.66rem;
-    padding: 3px 7px;
-  }
-
-  /* ── Hero Banner ── */
-  .hero-banner {
-    padding: 16px 14px;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .hero-greeting {
-    font-size: 1.35rem !important;
-    line-height: 1.3;
-    word-break: break-word;
-  }
-
-  .hero-sub {
-    font-size: 0.82rem !important;
-  }
-
-  .hero-ai-chip {
+  body:not(.desktop-mode-forced) .live-clock {
     font-size: 0.72rem;
-    padding: 4px 10px;
-    margin-bottom: 8px;
+    padding: 3px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
   }
 
-  .hero-visual .edge-pinwheel-wrap,
-  .hero-visual svg {
-    width: 70px !important;
-    height: 70px !important;
+  body:not(.desktop-mode-forced) .live-status-pill {
+    padding: 4px 8px;
+    font-size: 0.74rem;
   }
 
-  /* ── KPI Grid: 1 column on mobile ── */
-  .kpi-grid {
-    grid-template-columns: 1fr;
+  body:not(.desktop-mode-forced) .topbar-right .btn-gold {
+    padding: 5px 10px;
+    font-size: 0.76rem;
+  }
+
+  body:not(.desktop-mode-forced) .user-name-title {
+    font-size: 0.76rem;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body:not(.desktop-mode-forced) .user-role-tag {
+    font-size: 0.65rem;
+  }
+
+  /* ── Hero Greeting ── */
+  body:not(.desktop-mode-forced) .hero-greeting {
+    font-size: 1.3rem !important;
+    line-height: 1.3;
+  }
+
+  /* ── KPI Cards: 2 columns on mobile for clean grid ── */
+  body:not(.desktop-mode-forced) .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
-  .kpi-card {
-    padding: 18px;
-    min-height: 110px;
+  body:not(.desktop-mode-forced) .kpi-card {
+    padding: 14px;
+    min-height: 100px;
   }
 
-  .kpi-value {
-    font-size: 1.7rem;
+  body:not(.desktop-mode-forced) .kpi-value {
+    font-size: 1.5rem;
   }
 
-  /* ── Chart / Analytics ── */
-  .chart-card {
-    padding: 16px;
-  }
-
-  /* ── KDS Kitchen columns ── */
-  .kds-columns-wrap {
-    flex-direction: column !important;
-    gap: 14px;
-  }
-
-  /* ── Tables grid: 1 col ── */
-  .table-floor-grid {
+  /* ── Tables & Floor Grid: 2 cols on mobile ── */
+  body:not(.desktop-mode-forced) .table-floor-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-  /* ── Menu matrix: 1 col ── */
-  .menu-card-matrix {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  /* ── Stats grid ── */
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  /* ── Forms ── */
-  .form-row {
+  /* ── Menu Card Matrix: 1 col on mobile ── */
+  body:not(.desktop-mode-forced) .menu-card-matrix {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  /* ── Marquee / kinetic banner ── */
-  .kinetic-marquee-wrap {
-    font-size: 0.7rem;
+  /* ── Modals: Fit viewport height smoothly ── */
+  .modal-window {
+    width: calc(100% - 24px) !important;
+    max-height: calc(100vh - 32px) !important;
+    overflow-y: auto !important;
+    margin: 16px auto !important;
   }
 
-  /* ── Modals ── */
-  .modal-box {
-    margin: 12px;
-    max-height: calc(100vh - 24px);
-    overflow-y: auto;
+  .modal-body {
+    padding: 14px;
   }
 
-  /* ── Login Gate ── */
-  .gate-overlay {
-    padding: 16px 10px 32px;
-    align-items: flex-start;
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
   }
 
-  .gate-card {
-    padding: 22px 14px 18px;
+  /* ── Onboarding Gate Responsiveness ── */
+  .saas-gate-container {
+    padding: 0 4px;
+    gap: 14px;
+    width: 100%;
     max-width: 100%;
+  }
+
+  .saas-hero-card,
+  .saas-form-card {
+    padding: 14px 12px;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Apple Segmented Controls on Mobile */
+  .apple-segmented-box {
+    padding: 10px;
+    border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .apple-segmented-chips {
+    flex-direction: row;
+    gap: 4px;
+    padding: 3px;
     width: 100%;
   }
 
-  .gate-title {
-    font-size: 20px;
+  .apple-segmented-chip {
+    flex: 1;
+    padding: 9px 4px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .gate-subtitle {
-    font-size: 11px;
+  /* Location Picker Search Row & Map on Mobile */
+  .lp-search-section {
+    width: 100%;
   }
 
-  .gate-demo-chips {
+  .lp-search-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+  }
+
+  .lp-srch-input {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8rem;
+    padding: 6px 4px;
+  }
+
+  .lp-gps-pill {
+    flex-shrink: 0;
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  #lp-map {
+    height: 220px !important;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .lp-emoji-row {
+    display: flex;
     flex-direction: column;
     gap: 6px;
-  }
-
-  .demo-chip {
+    margin-top: 10px;
     width: 100%;
-    text-align: center;
-    padding: 10px 14px;
-    font-size: 0.83rem;
   }
 
-  /* AI SaaS Registration Layout Responsiveness */
-  .saas-gate-container {
-    max-width: 100%;
-    padding: 0 12px;
-    gap: 16px;
+  .lp-emoji-list {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: 4px 2px 8px 2px !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  .saas-hero-card {
-    padding: 18px 16px;
-    border-radius: 16px;
+
+  .lp-emoji-list::-webkit-scrollbar {
+    display: none;
   }
-  .saas-form-card {
-    padding: 20px 16px;
-    border-radius: 16px;
+
+  .lp-emoji-btn {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
   }
+
+  .saas-expanded-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .saas-action-buttons {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  #lp-confirm-btn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    justify-content: center;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4. EXTRA SMALL  ≤ 400px (Extreme Compact Preservation)
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+
+  body:not(.desktop-mode-forced) .saas-main-title {
+    font-size: 1.4rem;
+  }
+
   .apple-segmented-chips {
     flex-direction: column;
     gap: 6px;
   }
-  .saas-hero-title {
-    font-size: 1.05rem;
-  }
-  .saas-hero-subtitle {
-    font-size: 0.78rem;
-  }
-}
 
-/* ══════════════════════════════════════════════════════
-   EXTRA SMALL  ≤ 400px
-   ══════════════════════════════════════════════════════ */
-@media (max-width: 400px) {
-
-  /* Hide New Order button entirely */
-  .topbar-right .btn-gold {
-    display: none !important;
+  .apple-segmented-chip {
+    width: 100%;
   }
 
-  /* Hide kitchen pill */
-  .topbar-right .live-status-pill {
-    display: none !important;
-  }
-
-  /* Keep auth pill always visible */
-  .topbar-right .user-profile-pill,
-  .topbar-right .btn-glass {
-    display: flex !important;
-  }
-
-  .hero-greeting {
-    font-size: 1.2rem !important;
-  }
-
-  .table-floor-grid {
+  body:not(.desktop-mode-forced) .kpi-grid {
     grid-template-columns: 1fr;
   }
+
+  body:not(.desktop-mode-forced) .table-floor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.desktop-mode-forced) .topbar-restaurant-brand {
+    display: none;
+  }
+
+  body:not(.desktop-mode-forced) .view-mode-toggle-btn span:last-child {
+    display: none;
+  }
 }
 
-/* ─── Reduced Motion ─── */
+/* ─── Reduced Motion Support ─── */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -563,3 +792,4 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+

@@ -24,7 +24,7 @@
   <!-- ═══════════════════════════════════════════════
        BACKGROUND MOTION LAYERS (the-edge.studio inspired)
        ════════════════════════════════════════════════ -->
-  <div id="bg-wrap">
+  <div id="bg-wrap" style="pointer-events:none;">
     <div class="bg-mesh"></div>
     <div class="bg-grid"></div>
     
@@ -47,7 +47,7 @@
        ════════════════════════════════════════════════ -->
   <div id="login-landing-screen" class="gate-overlay">
     <!-- Ambient Multi-Layered AI SaaS Background (Light Green #A8E063, White #FFFFFF, Soft Coral Red #FF7A7A) -->
-    <div class="saas-bg-glow">
+    <div class="saas-bg-glow" style="pointer-events:none;">
       <div class="saas-form-light"></div>
       <div class="saas-blob saas-blob-1"></div>
       <div class="saas-blob saas-blob-2"></div>
@@ -73,7 +73,6 @@
         <!-- LEFT COLUMN (55%): Platform Badge, Heading, Description, Feature Badges, CTA -->
         <div class="saas-hero-left">
           <div class="saas-brand-tag">✨ DineMind AI Platform</div>
-          <h1 class="saas-main-title">Simplify &amp; Scale Restaurant Operations</h1>
           <p class="saas-main-desc">
             Add your restaurant profile, configure table layouts, and automate POS, kitchen KDS &amp; smart inventory with Mappls geocoding precision.
           </p>
@@ -376,6 +375,10 @@
           <span>🏪</span>
           <span id="sidebar-restaurant-label">My Restaurant</span>
         </button>
+        <button class="sidebar-footer-btn mt-8" id="sidebar-view-mode-btn" onclick="UI.toggleViewMode()" style="border-color:rgba(0,210,255,0.3);background:rgba(0,210,255,0.06);">
+          <span id="sidebar-view-mode-icon">🖥️</span>
+          <span id="sidebar-view-mode-label">Switch to Desktop Mode</span>
+        </button>
         <div class="text-3 text-xs text-center" style="margin-top:6px;">
           DineMind AI Operations
         </div>
@@ -400,9 +403,15 @@
         </div>
 
         <div class="topbar-right">
+          <!-- Desktop / Mobile View Mode Switcher -->
+          <button class="btn btn-glass btn-sm view-mode-toggle-btn" id="topbar-view-mode-btn" onclick="UI.toggleViewMode()" title="Toggle Desktop / Mobile UI Mode">
+            <span id="topbar-view-mode-icon">📱</span>
+            <span id="topbar-view-mode-text">Mobile View</span>
+          </button>
+
           <div class="live-status-pill pointer" onclick="App.navigate('kitchen')" title="Click to open Live Kitchen Display System (KDS)">
             <span class="status-dot"></span>
-            <span>Kitchen & Pos Live</span>
+            <span>Kitchen &amp; POS Live</span>
           </div>
 
           <div class="live-clock" id="live-clock-time">--:--:--</div>
@@ -627,8 +636,16 @@
             </div>
           </div>
 
+          <!-- KDS Mobile Column Filter Tabs -->
+          <div class="kds-mobile-tabs flex gap-8 mb-16 flex-wrap" id="kds-mobile-tabs">
+            <button type="button" class="btn btn-glass btn-sm kds-tab-btn active" onclick="App.filterKDSColumn('all', this)">🌐 All Columns</button>
+            <button type="button" class="btn btn-glass btn-sm kds-tab-btn" onclick="App.filterKDSColumn('pending', this)">⚡ Pending (<span id="kds-tab-pending-count">0</span>)</button>
+            <button type="button" class="btn btn-glass btn-sm kds-tab-btn" onclick="App.filterKDSColumn('preparing', this)">🍳 Cooking (<span id="kds-tab-preparing-count">0</span>)</button>
+            <button type="button" class="btn btn-glass btn-sm kds-tab-btn" onclick="App.filterKDSColumn('ready', this)">✅ Ready (<span id="kds-tab-ready-count">0</span>)</button>
+          </div>
+
           <!-- KDS 3-Column Ticket Board -->
-          <div class="grid gap-20" style="grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));">
+          <div class="grid gap-20 kds-board-grid" id="kds-board-grid" style="grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));">
             
             <!-- Column 1: Pending (New Incoming Orders) -->
             <div class="card-glass p-16" style="border-color:rgba(0,210,255,0.3);background:rgba(0,210,255,0.03);">

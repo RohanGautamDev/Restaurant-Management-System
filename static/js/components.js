@@ -132,5 +132,43 @@ const UI = {
     if (sidebar) sidebar.classList.remove('drawer-open');
     if (backdrop) backdrop.classList.remove('active');
     document.body.style.overflow = '';
+  },
+
+  // ─── 5. View Mode Switcher (Desktop 1:1 Mode vs Mobile Responsive) ───
+  initViewMode() {
+    const mode = localStorage.getItem('dinemind_view_mode') || 'mobile';
+    if (mode === 'desktop') {
+      this.applyViewMode(true);
+    } else {
+      this.applyViewMode(false);
+    }
+  },
+
+  toggleViewMode() {
+    const isDesktopForced = document.body.classList.contains('desktop-mode-forced');
+    const newMode = !isDesktopForced;
+    this.applyViewMode(newMode);
+    localStorage.setItem('dinemind_view_mode', newMode ? 'desktop' : 'mobile');
+    this.showToast(newMode ? '🖥️ Desktop View Mode Enabled' : '📱 Responsive Mobile Fit Enabled', 'info', 2500);
+  },
+
+  applyViewMode(isDesktop) {
+    if (isDesktop) {
+      document.body.classList.add('desktop-mode-forced');
+    } else {
+      document.body.classList.remove('desktop-mode-forced');
+    }
+
+    // Update Topbar button
+    const topbarIcon = document.getElementById('topbar-view-mode-icon');
+    const topbarText = document.getElementById('topbar-view-mode-text');
+    if (topbarIcon) topbarIcon.textContent = isDesktop ? '📱' : '🖥️';
+    if (topbarText) topbarText.textContent = isDesktop ? 'Mobile Fit' : 'Desktop Mode';
+
+    // Update Sidebar button
+    const sidebarIcon = document.getElementById('sidebar-view-mode-icon');
+    const sidebarLabel = document.getElementById('sidebar-view-mode-label');
+    if (sidebarIcon) sidebarIcon.textContent = isDesktop ? '📱' : '🖥️';
+    if (sidebarLabel) sidebarLabel.textContent = isDesktop ? 'Switch to Mobile Fit' : 'Switch to Desktop Mode';
   }
 };

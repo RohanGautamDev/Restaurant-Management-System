@@ -17,6 +17,7 @@ const App = {
     UI.initModals();
     UI.initClock();
     UI.initSidebar();
+    UI.initViewMode();
 
     this.initAuth();
     this.bindNavigation();
@@ -185,6 +186,13 @@ const App = {
       if (countPr) countPr.textContent = preparingList.length;
       if (countR) countR.textContent = readyList.length;
 
+      const tabP = document.getElementById('kds-tab-pending-count');
+      const tabPr = document.getElementById('kds-tab-preparing-count');
+      const tabR = document.getElementById('kds-tab-ready-count');
+      if (tabP) tabP.textContent = pendingList.length;
+      if (tabPr) tabPr.textContent = preparingList.length;
+      if (tabR) tabR.textContent = readyList.length;
+
       const renderTicketCard = (o, accentColor, buttonHtml) => `
         <div class="card-glass p-16 flex flex-col justify-between mb-12" style="border-left:4px solid ${accentColor};">
           <div>
@@ -240,6 +248,35 @@ const App = {
         console.error(err);
         UI.showToast('Failed to refresh Kitchen Display board.', 'error');
       }
+    }
+  },
+
+  filterKDSColumn(status, btnElement) {
+    document.querySelectorAll('.kds-tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+
+    const colPending = document.getElementById('kds-column-pending')?.parentElement;
+    const colPreparing = document.getElementById('kds-column-preparing')?.parentElement;
+    const colReady = document.getElementById('kds-column-ready')?.parentElement;
+
+    if (!colPending || !colPreparing || !colReady) return;
+
+    if (status === 'all') {
+      colPending.style.display = '';
+      colPreparing.style.display = '';
+      colReady.style.display = '';
+    } else if (status === 'pending') {
+      colPending.style.display = 'block';
+      colPreparing.style.display = 'none';
+      colReady.style.display = 'none';
+    } else if (status === 'preparing') {
+      colPending.style.display = 'none';
+      colPreparing.style.display = 'block';
+      colReady.style.display = 'none';
+    } else if (status === 'ready') {
+      colPending.style.display = 'none';
+      colPreparing.style.display = 'none';
+      colReady.style.display = 'block';
     }
   },
 
